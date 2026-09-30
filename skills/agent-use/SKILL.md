@@ -40,7 +40,7 @@ Every meaningful handoff provides:
 ```text
 Objective: user-visible outcome for this assignment
 Workspace: absolute root and cwd
-Task: workplan id/path, phase/step ids and linked specs when present
+Task: workplan id/path, phase/step ids and linked specs when present (workers read state with scoped `workplan_inspect`, not full `workplan_read`)
 Ownership: files/components this worker may change; shared/blocked files
 Dependencies: prerequisite results and merge order
 Acceptance: observable behavior that must hold

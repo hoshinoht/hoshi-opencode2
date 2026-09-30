@@ -55,6 +55,9 @@ permissions:
   - action: workplan_validate
     resource: "*"
     effect: allow
+  - action: workplan_resume
+    resource: "*"
+    effect: allow
   - action: shell
     resource: bun test*
     effect: allow

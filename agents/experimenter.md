@@ -51,6 +51,9 @@ permissions:
   - action: workplan_validate
     resource: "*"
     effect: allow
+  - action: workplan_resume
+    resource: "*"
+    effect: allow
   - action: edit
     resource: "*"
     effect: allow

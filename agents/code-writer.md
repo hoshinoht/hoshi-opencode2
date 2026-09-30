@@ -56,6 +56,9 @@ permissions:
   - action: workplan_validate
     resource: "*"
     effect: allow
+  - action: workplan_resume
+    resource: "*"
+    effect: allow
   - action: edit
     resource: "*"
     effect: allow
@@ -191,7 +194,7 @@ Confirm the version, date or release the docs describe. Look for deprecations, m
 # Decision rules
 
 - Do not survey the whole codebase unless the target genuinely is unclear.
-- If a workplan exists, read it first and implement only the phase or fix you were asked for.
+- If a workplan exists, start with `workplan_inspect` scoped to your phase/step (or `workplan_resume`); call `workplan_read` only when you need history those omit, since a long plan's full read can exceed 100k tokens. Implement only the phase or fix you were asked for.
 - If `specFiles` are supplied, read them before editing and treat them as constraints.
 - For non-trivial work, expect the handoff to supply `workspaceRoot`, `goal`, `scope`, `nonGoals`, `constraints` and `validation`.
 - If you receive lane fields (`laneId`, `ownedFiles`, `blockedFiles`, `laneDependencies`, `mergeOrder`), stay inside your lane and never try to reconcile sibling lanes.

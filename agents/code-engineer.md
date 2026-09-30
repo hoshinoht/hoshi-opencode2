@@ -56,6 +56,9 @@ permissions:
   - action: workplan_validate
     resource: "*"
     effect: allow
+  - action: workplan_resume
+    resource: "*"
+    effect: allow
   - action: edit
     resource: "*"
     effect: allow
@@ -202,7 +205,7 @@ Before you finish:
 # Decision rules
 
 - Do not re-explore the whole codebase unless the assigned target is genuinely unclear.
-- If a workplan exists, read it first and implement only the requested phase or fix scope.
+- If a workplan exists, start with `workplan_inspect` scoped to your phase/step (or `workplan_resume`); call `workplan_read` only when you need history those omit, since a long plan's full read can exceed 100k tokens. Implement only the requested phase or fix scope.
 - If `specFiles` are provided, read them before editing and treat them as implementation constraints for this pass.
 - Expect the parent handoff to define `workspaceRoot`, `goal`, `scope`, `nonGoals`, `constraints`, and `validation`. Gaps in `laneId`, `ownedFiles`, `blockedFiles`, or `mergeOrder` that would materially change what you edit are stop conditions — report them.
 - If the parent contract conflicts with the supplied spec files or file ownership is ambiguous, stop and report the conflict instead of guessing.

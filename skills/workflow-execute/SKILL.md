@@ -61,7 +61,7 @@ Single integrator still holds: workers never merge sibling lanes themselves.
 
 # State updates
 
-Prefer one active workplan per task. Use `workplan_read`/`inspect` before targeted updates when available. `workplan_update` owns JSON fields; `workplan_patch` owns localized Markdown prose. Omit unchanged optional fields and never send empty placeholder strings or full planMarkdown for routine updates. If tools are absent, edit the same version-2 JSON and Markdown directly; preserve ids, markers and unrelated state.
+Prefer one active workplan per task. Before targeted updates use `workplan_resume` or `workplan_inspect` scoped to the phase/step; reserve full `workplan_read` for historical detail, because long plans grow to hundreds of KB and a full read can cost 100k+ tokens. `workplan_update` owns JSON fields; `workplan_patch` owns localized Markdown prose. Omit unchanged optional fields and never send empty placeholder strings or full planMarkdown for routine updates. If tools are absent, edit the same version-2 JSON and Markdown directly; preserve ids, markers and unrelated state.
 
 Record review severities as `blocker`, `critical`, `major`, `minor`, `note`, `question`; map legacy Critical -> critical, High -> major, Medium -> minor, Low -> note. Mark resolved findings explicitly. Do not confuse structural `valid` with verified completion. Preserve failed attempt history and the current resume point across compaction.
 

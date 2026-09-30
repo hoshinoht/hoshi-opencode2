@@ -36,7 +36,7 @@ agents:
 |---|---|
 | `core-read` | `read`, `glob`, `grep`, `skill` |
 | `web` | `webfetch`, `websearch`, `gofetch_*`, `context7_*`, `deepwiki_*` |
-| `workplan-read` | `workplan_read`, `workplan_list`, `workplan_inspect`, `workplan_validate` |
+| `workplan-read` | `workplan_read`, `workplan_list`, `workplan_inspect`, `workplan_validate`, `workplan_resume` |
 | `shell-guard` | ask before `git push*`, `git reset --hard*`, `git clean*`, `rm -rf*` |
 | `implement` | `edit` and `shell` allowed, followed by `@shell-guard` |
 | `workplan-write-deny` | deny `workplan_create`, `workplan_update`, `workplan_patch`, `workplan_reset` |

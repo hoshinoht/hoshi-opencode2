@@ -61,6 +61,9 @@ permissions:
   - action: workplan_resume
     resource: "*"
     effect: allow
+  - action: workplan_resume
+    resource: "*"
+    effect: allow
   - action: workplan_doctor
     resource: "*"
     effect: allow

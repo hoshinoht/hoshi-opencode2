@@ -54,6 +54,9 @@ permissions:
   - action: workplan_validate
     resource: "*"
     effect: allow
+  - action: workplan_resume
+    resource: "*"
+    effect: allow
   - action: shell
     resource: git status --short
     effect: allow

@@ -19,6 +19,7 @@ fragments:
     - [workplan_list, "*", allow]
     - [workplan_inspect, "*", allow]
     - [workplan_validate, "*", allow]
+    - [workplan_resume, "*", allow]
   shell-guard:
     - [shell, git push*, ask]
     - [shell, git reset --hard*, ask]
