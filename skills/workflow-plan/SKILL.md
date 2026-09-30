@@ -1,7 +1,7 @@
 ---
 name: workflow-plan
 description: Create or revise a durable development plan for cross-session, multi-owner, migration, staged-rollout, or consequential work. Ordinary planning stays inline; planning never authorizes implementation by itself.
-compatibility: Requires OpenCode 2 with this repository's agents and the workplan_* tools from packages/workplan-tools.
+compatibility: Requires OpenCode 2 with this repository's agents and the workplan_* tools served by Shiori (vendor/shiori).
 metadata:
   domain: software-engineering
   workflow: workplan-planning

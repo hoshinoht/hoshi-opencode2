@@ -25,7 +25,7 @@
 # #variant here is authoritative only for providers the router does not manage.
 
 # Switch with: active: openai | anthropic | opencode
-active: openai
+active: anthropic
 
 presets:
   # Agent frontmatter and opencode.json models, unchanged.

@@ -1,7 +1,7 @@
 ---
 name: workflow-execute
 description: Execute an existing durable development workplan through scoped implementation and evidence-backed validation. Routine inline plans do not use this skill.
-compatibility: Requires OpenCode 2 with this repository's agents and the workplan_* tools from packages/workplan-tools.
+compatibility: Requires OpenCode 2 with this repository's agents and the workplan_* tools served by Shiori (vendor/shiori).
 metadata:
   domain: software-engineering
   workflow: workplan-execution
@@ -54,6 +54,7 @@ Each rule stands alone; apply the ones that match what you are doing.
 - Reconfirm stale checkpoint guardrails and blockers. A fresh plan checkpoint does not make test evidence fresh.
 - Compaction, in order: update, checkpoint, read-only preview, then apply with that exact `previewToken`, the current `expectedHash` and `confirmation: "ARCHIVE_SELECTED_HISTORY"`. Any change in between needs a new preview.
 - Only the orchestrator may checkpoint, apply compaction or recover a transaction. Recovery uses `workplan_update` with `recovery: "resume" | "rollback"` and no normal update fields.
+- A create interrupted before the plan file existed shows in `workplan_doctor` as a plan entry with `recoveryRequired: true` and a `stateHash`; recover it with `workplan_update` recovery, passing that `stateHash` as `expectedHash`. `workplan_read` still reports such a plan as not found.
 - On an external-edit conflict, stop. Never delete locks or journals, and never bypass a pending transaction with fallback edits.
 - Do not retry nonexistent or stale tools in a loop.
 

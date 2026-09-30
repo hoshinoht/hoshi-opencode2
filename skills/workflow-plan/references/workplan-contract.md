@@ -91,7 +91,7 @@ The parent orchestrator agent can run `bun ~/.config/opencode/scripts/check-work
 - A native write to existing state needs the current `stateHash` as `expectedHash`, taken from read, inspect, resume or a successful write. A stale hash means re-read and recompute. Hashes and tokens bind state; they are not authorization.
 - Tool writers serialize workspace linkage and per-plan changes. Each file is published atomically. A multi-file failure leaves explicit recovery state.
 - Read-only tools never recover, create locks or repair files.
-- Only the orchestrator may run recovery, through `workplan_update` recovery mode and separate from normal update fields. Recovery refuses targets edited outside the tools rather than overwriting them.
+- Only the orchestrator may run recovery, through `workplan_update` recovery mode and separate from normal update fields. Recovery refuses targets edited outside the tools rather than overwriting them. For an interrupted create, take `expectedHash` from the `stateHash` that `workplan_doctor` reports for the `recoveryRequired` entry.
 - The planner and orchestrator may author plans. Only the orchestrator may checkpoint or apply compaction.
 - Native permissions must cover every exact path a mutation touches and the live invocation. An unknown host, denied approval or cancellation fails closed. Never bypass a pending transaction or a failed permission check with raw edits.
 - Compaction order: update, checkpoint, read-only preview, apply. Apply needs the unchanged `previewToken`, the current `expectedHash`, a fresh checkpoint covering all artifacts, and `confirmation: "ARCHIVE_SELECTED_HISTORY"`. Changing the state or the selection needs a new preview. Complete originals are archived before anything is pruned.
