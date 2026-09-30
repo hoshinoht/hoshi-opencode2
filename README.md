@@ -29,7 +29,7 @@
 | **Agents** | 17: 4 primary, 1 dual-mode (`plan`), 12 subagents, each with generated least-privilege permissions |
 | **Plugins** | reasoning-router · model-presets · openai-long-context · usage-tracker · workplan-tools · cache-guard · docs |
 | **MCP servers** | gofetch · researcher-mcp · context7 · deepwiki · grep_app · lsp-tools |
-| **Skills** | 12 [Agent Skills](https://agentskills.io), most of them platform-agnostic |
+| **Skills** | 13 [Agent Skills](https://agentskills.io), most of them platform-agnostic |
 
 ## Features
 
@@ -86,7 +86,8 @@ Roles, built-in overrides and reasoning tiers: [docs/agents.md](docs/agents.md).
 
 | Skill | Purpose |
 | --- | --- |
-| `agent-use` | routing, scoping and acceptance evidence for delegation |
+| `agent-use` | when to delegate, routing, the brief and the receipt contract |
+| `implementation` | shared procedure for implementation subagents: docs check, smallest change, verification, failure handling |
 | `workflow-plan` / `workflow-execute` | durable workplans and their execution |
 | `docs-workflow` | the `docs_*` tool flow, presets, `refs.bib`, citation styles |
 | `git-commit` | commit conventions, granularity and branch safety |

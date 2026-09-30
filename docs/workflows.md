@@ -48,7 +48,8 @@ The `plan` agent has `mode: all`, so you can select it directly or let the orche
 
 - Workers run as background child sessions and start with fresh context.
 - `experimental.subagent_depth: 2` in `opencode.json` means implementation and review workers cannot spawn further subagents.
-- The `agent-use` skill holds the routing, scoping, ownership and acceptance-evidence rules; primary agents load it before delegating.
+- The `agent-use` skill holds the delegation rule, routing table, brief template and receipt contract; `build`, `orchestrator`, `plan` and `scholar` load it before delegating. Workplan step claims, worktree lanes and router details are in its `references/delegation-details.md`.
+- Implementation workers load the `implementation` skill for the shared working procedure (docs check, smallest change, verification, failure protocol, receipt).
 
 ## Review
 

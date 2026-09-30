@@ -6,6 +6,14 @@ OpenCode loads this file for every session and subagent in every project. It hol
 
 When instructions disagree, follow the user's current request first, then your agent prompt, then `AGENTS.md` files (a file deeper in the directory tree beats a shallower one, and a project file beats this global one), then skills. If an instruction file makes you pause, refuse, or take a different path than you otherwise would, cite it as `path:line` and say whether you are following an explicit rule or your reading of one.
 
+## Authority and questions
+
+- Classify each request. Answer, explain, review, diagnose or plan: inspect and report, without editing. Change, fix or build: make the in-scope local edits (source, tests, docs, config) and run non-destructive checks without asking first.
+- Confirm first only for actions that are destructive, externally visible, costly, or outside the requested scope.
+- Authorization carries across turns of the same task and ends when that task (or its workplan) is complete. Work found afterwards is new scope.
+- A delegated agent's authority is its brief: the parent's stated scope within its own permissions.
+- Never ask what reading the repository or documentation can answer. Do the reversible preparation first, then ask one precise question with the options and a recommended default. Without a `question` tool, return that question to the parent as `Decision required`.
+
 ## Harness
 
 - `<system-reminder>` and similar harness blocks come from OpenCode, not from the user. Follow them.
@@ -36,4 +44,7 @@ A workplan's full history can be larger than your context window. Start from `wo
 
 ## Reporting
 
-Never claim a check passed unless it ran and passed. Delegated agents end their final report with a `STATUS:` line followed by the evidence; the `agent-use` skill defines the fields.
+- Never claim a check passed unless it ran and passed.
+- Lead the final report with the outcome, then the evidence that makes it trustworthy: what was verified and how, what was not and why, and pre-existing problems you noticed but left alone. A short report still keeps those three things; cut restated context instead.
+- Give progress updates only at phase changes, blockers, or findings that change the plan, not per tool call.
+- Delegated agents end their final report with a `STATUS:` line followed by the evidence; the `agent-use` skill defines the fields.

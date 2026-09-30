@@ -238,14 +238,19 @@ Stable section-local IDs (`HIER-2`, `HPK-4`). Supporting bullets/examples inheri
 
 ## Anti-slop bar
 
-**SLOP-1 — Banned defaults.** No generic font stacks (Inter/Roboto/Arial/plain system), no predictable centered-hero-card template layouts, no purple-on-white gradients, no emoji as icons, no animating layout properties (width/height/top/left/margin).
-**SLOP-2 — Icons.** Inline SVG with distinct silhouettes and accessible names; never emoji icons (extends ICON-1–ICON-4).
-**SLOP-3 — Motion compositing.** Animate transform/opacity only (GPU-composited); layout-property animation is a defect. Respect reduced motion (A11Y-9).
-**SLOP-4 — Contract gate.** When the repo has DESIGN.md, its tokens/typography/motion decisions gate visual choices; conflicts resolve per AUTH-1 precedence.
+**SLOP-1 — Existing system first.** In an existing product, its design system decides. Matching it beats looking distinctive; the rules below apply to choices the system leaves open.
 
-**OUTPUT-1 — Completion gate.** Do not finish until requested artifact is delivered, mode loop complete, and evidence supports recognition, action, recovery. Put blockers, unresolved defects, and unverified claims in final evidence table.
+**SLOP-2 — No unearned defaults.** Each of these needs a reason from the brief or the content, not habit: a centred hero followed by three identical feature cards; a purple-to-blue or rainbow gradient; frosted-glass panels; every surface a rounded card with a soft shadow; emoji standing in for icons; a row of big-number stats; a pill badge above every heading.
+
+**SLOP-3 — Nothing decorative that pretends to be information.** Badges, counters, status dots, progress bars and charts show real data or are removed. No invented metrics, testimonials, logos or user counts; use representative content (WF-4) and mark placeholders as placeholders.
+
+**SLOP-4 — Specific words.** Copy names the actual product, object and action. Cut stock marketing verbs and filler ("seamless", "unlock", "elevate", "powerful", "all-in-one") and headlines that would fit any product.
+
+**SLOP-5 — One pass of removal.** Before calling a screen done, look for elements that add no user value (WF-5) and remove or demote them, and confirm nothing competes with the primary action (HIER-2).
 
 ## Mandatory final evidence
+
+**OUTPUT-1 — Placement.** The evidence table is the last part of the answer. A delegated agent follows it only with its STATUS receipt.
 
 **OUTPUT-2 — Always.** If skill used, final response section = exactly one table below. No replacement prose.
 

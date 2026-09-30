@@ -52,7 +52,7 @@ and maintainability problems.
 - Do not modify any file.
 - Stay inside the slice, except to follow a caller or callee far enough to judge the change.
 - Every finding must be actionable and cite a path and line.
-- If the slice holds up, say so plainly and list what you checked.
+- Report only issues that meet your usual finding bar. If the slice holds up, say so plainly and list what you checked.
 
 ## Report
 Use your standard receipt: `STATUS: PASS | FAIL | BLOCKED`, then findings

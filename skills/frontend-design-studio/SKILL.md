@@ -38,15 +38,29 @@ interpretation instead of building on it.
 
 Create a compact plan before writing UI code:
 
-- **Colour:** 4–6 named semantic values with a clear dominant colour story.
+- **Colour:** 4–6 named semantic values with a clear dominant colour story,
+  defined as CSS custom properties (palette plus semantic tokens) with
+  deliberate accents.
 - **Type:** deliberate display and body roles, or one family used with
-  intentional scale, weight, width, and spacing. Avoid default-looking stacks.
+  intentional scale, weight, width, and spacing. Avoid default-looking stacks
+  such as Arial, Inter, Roboto or a bare system stack unless the brief earns
+  them. Set hierarchy through scale, weight, spacing and rhythm.
 - **Layout:** a one-sentence composition concept and a small ASCII wireframe.
   State whether content is left-aligned, centred, justified, dense, or airy.
+  Asymmetry, overlap or a strong grid are available when they serve the
+  subject; a template layout is a choice, not a default.
+- **Atmosphere:** background, texture, depth or pattern that sets the mood.
+  A flat surface is fine when minimalism is the concept.
 - **Principles:** the choices that make this interface specific to its subject.
 
 Review the plan against the brief. If it resembles a generic answer for the
-same product category, revise the direction before coding.
+same product category, revise the direction before coding. Maximalist and
+minimalist directions are both valid; maximalism needs depth and minimalism
+needs precision.
+
+If the visual direction is unclear but the subject is known, weigh two or three
+distinct directions, choose the one the product context best supports, and
+record it as an assumption the user can change.
 
 ## Distinctiveness guardrails
 
@@ -62,7 +76,11 @@ same product category, revise the direction before coding.
 - Avoid single-word headline accents, unnecessary labels, and generic
   fade-and-slide entrances on every section.
 - Use motion sparingly: one orchestrated reveal or interaction-led transition
-  is preferable to scattered effects. Respect reduced motion.
+  is preferable to scattered effects. Prefer CSS for simple builds and the
+  framework's motion library when the project has one. Respect reduced motion.
+- If the build drifts toward generic or inconsistent styling, find where it
+  drifted, re-anchor typography, colour, spacing and motion to the thesis, and
+  re-check responsiveness and accessibility afterwards.
 
 ## Content and interaction
 

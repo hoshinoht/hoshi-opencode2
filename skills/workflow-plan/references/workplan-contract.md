@@ -87,28 +87,15 @@ The parent orchestrator agent can run `bun ~/.config/opencode/scripts/check-work
 
 ## Native mutation and continuation contract
 
-- Keep core `schemaVersion: 2`. Checkpoints, dependency metadata and recovery
-  journals are separately versioned sidecars; reads never migrate old artifacts.
-- Native existing-state writes require current `stateHash` as `expectedHash`.
-  Retrieve it from read/inspect/resume or a successful mutation. A stale hash
-  means reread and recompute; tokens/hashes are state bindings, not authorization.
-- Tool writers serialize workspace linkage and per-plan changes. Individual
-  files publish atomically; multi-file failure leaves explicit recovery state.
-  Read-only tools never recover, create locks or repair files. Only orchestrator
-  may use `workplan_update` recovery mode, separate from normal update fields.
-  Recovery must refuse externally edited targets rather than overwrite them.
-- Planner/orchestrator may author plans; only orchestrator may checkpoint or
-  apply compaction. Native permissions must cover every exact mutation path and
-  the live invocation; unknown host, denied approval or cancellation fails closed.
-  Do not bypass pending transactions or failed permission checks via raw edits.
-- Compaction order: update -> checkpoint -> read-only preview -> apply. Apply
-  needs unchanged `previewToken`, current `expectedHash`, fresh multiartifact
-  checkpoint and `confirmation: "ARCHIVE_SELECTED_HISTORY"`. Changing state or
-  selection requires a new preview; complete originals are archived before pruning.
-- Checkpoint freshness binds JSON, linked Markdown and specs, not tested code.
-  Legacy/stale guidance and guardrails are unverified and require reconfirmation;
-  their omission or staleness never authorizes relaxing an existing restriction.
-- Resume output is bounded and paginated. Respect omission/danger counts and
-  retrieve referenced work through exact read/inspect pointers or the returned
-  snapshot-bound cursor before declaring readiness or completion. Doctor is
-  diagnostic only: unavailable effective permission facts remain unknown.
+- Core metadata stays at `schemaVersion: 2`. Checkpoints, dependency metadata and recovery journals are separately versioned sidecar files. Reads never migrate old artifacts.
+- A native write to existing state needs the current `stateHash` as `expectedHash`, taken from read, inspect, resume or a successful write. A stale hash means re-read and recompute. Hashes and tokens bind state; they are not authorization.
+- Tool writers serialize workspace linkage and per-plan changes. Each file is published atomically. A multi-file failure leaves explicit recovery state.
+- Read-only tools never recover, create locks or repair files.
+- Only the orchestrator may run recovery, through `workplan_update` recovery mode and separate from normal update fields. Recovery refuses targets edited outside the tools rather than overwriting them.
+- The planner and orchestrator may author plans. Only the orchestrator may checkpoint or apply compaction.
+- Native permissions must cover every exact path a mutation touches and the live invocation. An unknown host, denied approval or cancellation fails closed. Never bypass a pending transaction or a failed permission check with raw edits.
+- Compaction order: update, checkpoint, read-only preview, apply. Apply needs the unchanged `previewToken`, the current `expectedHash`, a fresh checkpoint covering all artifacts, and `confirmation: "ARCHIVE_SELECTED_HISTORY"`. Changing the state or the selection needs a new preview. Complete originals are archived before anything is pruned.
+- Checkpoint freshness covers the JSON, linked Markdown and specs, not the tested code.
+- Legacy or stale guidance and guardrails count as unverified and need reconfirmation. Their absence or staleness never permits relaxing an existing restriction.
+- Resume output is bounded and paginated. Respect its omission and danger counts, and fetch referenced work through the exact read or inspect pointers or the returned cursor before declaring readiness or completion.
+- `workplan_doctor` only diagnoses. Permission facts it cannot see stay unknown.
