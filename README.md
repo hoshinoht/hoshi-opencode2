@@ -29,7 +29,7 @@
 | **Agents** | 17: 4 primary, 1 dual-mode (`plan`), 12 subagents, each with generated least-privilege permissions |
 | **Plugins** | reasoning-router · model-presets · openai-long-context · usage-tracker · shiori (workplan) · cache-guard · docs |
 | **MCP servers** | gofetch · researcher-mcp · context7 · deepwiki · grep_app · lsp-tools |
-| **Skills** | 13 [Agent Skills](https://agentskills.io), most of them platform-agnostic |
+| **Skills** | 14 [Agent Skills](https://agentskills.io), most of them platform-agnostic |
 
 ## Features
 
@@ -97,6 +97,7 @@ Roles, built-in overrides and reasoning tiers: [docs/agents.md](docs/agents.md).
 | `frontend-design` / `frontend-design-studio` | frontend UX and visual direction |
 | `metric-loop` | keep-or-revert experiment loop against a mechanical metric |
 | `logo-design` | logo design with SVG audit, render and export scripts |
+| `write-readme` | write or restyle a README in the house layout: concise, verified, emoji-free |
 
 ### Plugins
 
