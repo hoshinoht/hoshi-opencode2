@@ -188,7 +188,7 @@ opencode mcp list
 > Secrets stay out of git: `.env`, `.exa-api-key` and `service.json` are ignored. `.env` files are only readable after an explicit approval.
 
 > [!WARNING]
-> `opencode serve --service` reads `service.json`. If its `hostname` is `0.0.0.0`, the server is reachable from your whole network; use `127.0.0.1` unless you connect from other machines.
+> Keep the background server on `127.0.0.1` (`opencode service set hostname 127.0.0.1`). For access from other devices, publish it to your tailnet with `tailscale serve` rather than binding `0.0.0.0`, which exposes it to the whole LAN. See [remote access](docs/install.md#remote-access-over-tailscale).
 
 - **Least privilege:** every agent starts from deny or ask; only `build`, `orchestrator`, `plan` and `scholar` may delegate, and destructive shell commands (`git push`, `git reset --hard`, `git clean`, `rm -rf`) always ask.
 - **Experiments are isolated:** `experimenter` commits only on its own `autoresearch/<tag>` branch in a separate worktree, and never pushes or merges.

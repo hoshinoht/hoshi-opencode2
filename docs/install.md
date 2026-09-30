@@ -65,3 +65,20 @@ Start a fresh session after changing config or plugins; a running session may no
 |---|---|
 | `opencode.json` | server: agents' built-in overrides, MCP servers, plugins, default agent |
 | `cli.json` | TUI: theme, diffs, session display, tabs, prompt |
+
+## Remote access over Tailscale
+
+The background server should listen only on this machine; Tailscale publishes it to your tailnet with HTTPS.
+
+```sh
+opencode service set hostname 127.0.0.1
+opencode service set port 4096          # fixed port instead of a random one
+opencode service restart
+tailscale serve --bg --https=443 http://127.0.0.1:4096
+```
+
+- The server is then reachable at `https://<machine>.<tailnet>.ts.net` from tailnet devices only; LAN and direct tailnet-IP connections to the port are refused. The OpenCode server password still applies.
+- `opencode service set` stores these settings in `service.json` in this directory (git-ignored).
+- Pair a browser or app with `opencode pair --url https://<machine>.<tailnet>.ts.net`.
+- A Mac usually cannot open its own `tailscale serve` URL (the request loops through the Tailscale network extension); test from another tailnet device.
+- Undo: `tailscale serve --https=443 off` and `opencode service set hostname 127.0.0.1` (keep it local).
