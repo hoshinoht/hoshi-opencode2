@@ -140,7 +140,11 @@
       "package": "./packages/usage-tracker"
     },
     {
-      "package": "./packages/workplan-tools"
+      // Workplan tools served by Shiori (vendor/shiori). Rollback: swap back to
+      // "./packages/workplan-tools" after workplan_doctor shows no pending journals.
+      // Never register both.
+      "package": "./vendor/shiori/adapter/opencode",
+      "options": { "bin": "{env:HOME}/.config/opencode/vendor/shiori/shiori" }
     },
     {
       "package": "./packages/docs"

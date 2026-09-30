@@ -1,2 +1,2 @@
 [test]
-pathIgnorePatterns = ["mcps/**", "node_modules/**"]
+pathIgnorePatterns = ["mcps/**", "vendor/**", "node_modules/**"]

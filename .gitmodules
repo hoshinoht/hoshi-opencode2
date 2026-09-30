@@ -4,3 +4,6 @@
 [submodule "mcps/researcher-mcp"]
 	path = mcps/researcher-mcp
 	url = git@github.com:hoshinoht/researcher-mcp.git
+[submodule "vendor/shiori"]
+	path = vendor/shiori
+	url = git@github.com:hoshinoht/shiori.git

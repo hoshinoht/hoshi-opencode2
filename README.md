@@ -19,7 +19,7 @@
 > Models, reasoning effort, tool permissions and delegation rules are declared here, not improvised per session. Every agent gets only the tools its role needs.
 
 > [!NOTE]
-> OpenCode 1 plugins are not loaded. The workplan engine will later move to [Shiori](https://github.com/hoshinoht/shiori), a Go core with an OpenCode adapter.
+> OpenCode 1 plugins are not loaded. Workplan tools are served by [Shiori](https://github.com/hoshinoht/shiori) (`vendor/shiori`), a Go core with an OpenCode adapter.
 
 ## At a glance
 
@@ -27,7 +27,7 @@
 | --- | --- |
 | **Entry points** | `build` (default) for everyday work · `/dev` for orchestrated features · `scholar` for papers |
 | **Agents** | 17: 4 primary, 1 dual-mode (`plan`), 12 subagents, each with generated least-privilege permissions |
-| **Plugins** | reasoning-router · model-presets · openai-long-context · usage-tracker · workplan-tools · cache-guard · docs |
+| **Plugins** | reasoning-router · model-presets · openai-long-context · usage-tracker · shiori (workplan) · cache-guard · docs |
 | **MCP servers** | gofetch · researcher-mcp · context7 · deepwiki · grep_app · lsp-tools |
 | **Skills** | 13 [Agent Skills](https://agentskills.io), most of them platform-agnostic |
 
@@ -106,7 +106,8 @@ Roles, built-in overrides and reasoning tiers: [docs/agents.md](docs/agents.md).
 | `model-presets` | switches every agent's model between named presets (`/preset`) from `model-presets.yaml` |
 | `openai-long-context` | adds `-1m` long-context variants of OpenAI models |
 | `usage-tracker` | Copilot and OpenAI/Codex quota view (`/usage`) |
-| `workplan-tools` | the 13 `workplan_*` tools for durable plans, checkpoints and recovery |
+| `shiori` (`vendor/shiori`) | the 13 `workplan_*` tools for durable plans, checkpoints and recovery, served by a Go core |
+| `workplan-tools` | previous TypeScript engine; kept for rollback, not registered |
 | `cache-guard` | advisory warning before an idle prompt cache expires |
 | `docs` | pandoc reports, school reports and styled PDFs (`docs_*` tools) |
 | `quota-fallback` | model failover on quota errors; present, not registered |
@@ -136,7 +137,7 @@ flowchart LR
   S --> DP
   subgraph Plugins["Local plugins"]
     RR[reasoning-router]
-    WP[workplan-tools]
+    WP[shiori workplan]
     DC[docs]
   end
   subgraph MCP["MCP servers"]
@@ -163,6 +164,7 @@ cd ~/.config/opencode
 bun install
 
 # 3. Build the local MCP servers
+(cd vendor/shiori && CGO_ENABLED=0 go build -trimpath -o shiori ./cmd/shiori)
 make -C mcps/gofetch-mcp build
 (cd mcps/researcher-mcp && go build -o bin/researcher-mcp ./cmd/google-scholar-mcp)
 

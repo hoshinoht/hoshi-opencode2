@@ -10,7 +10,8 @@ Local plugins live in `packages/`. Each is an `@hoshi-opencode2/*` package built
 | `model-presets` | yes | switches every agent's model between named presets at runtime (`/preset`) |
 | `openai-long-context` | yes | adds 1M-context `-1m` variants of OpenAI models |
 | `usage-tracker` | yes | GitHub Copilot and OpenAI/Codex quota windows in the TUI |
-| `workplan-tools` | yes | durable workplan lifecycle tools |
+| `shiori` adapter (`vendor/shiori/adapter/opencode`) | yes | durable workplan lifecycle tools (Go core) |
+| `workplan-tools` | no (rollback) | previous TypeScript engine |
 | `cache-guard` | yes | advisory warning when an OpenAI prompt cache is likely going cold |
 | `quota-fallback` | no | model failover on quota or rate-limit errors |
 | `docs` | yes | pandoc document generation behind the `docs_*` tools |
@@ -83,7 +84,16 @@ A read-only structural checker is also available. It checks shape, not acceptanc
 bun ~/.config/opencode/scripts/check-workplan.ts <absolute-project-root> <workplan-id>
 ```
 
-**Planned:** this engine will later be replaced by [Shiori](https://github.com/hoshinoht/shiori), a Go core with an OpenCode adapter.
+**Replaced by Shiori.** Since 2026-09-30 the `workplan_*` tools are served by [Shiori](https://github.com/hoshinoht/shiori), vendored as the `vendor/shiori` submodule: same 13 tools, arguments, file formats and hashes, with a Go core (`shiori serve --stdio`) behind a small adapter. Registration in `opencode.json`:
+
+```jsonc
+{ "package": "./vendor/shiori/adapter/opencode",
+  "options": { "bin": "{env:HOME}/.config/opencode/vendor/shiori/shiori" } }
+```
+
+Build the binary with `(cd vendor/shiori && CGO_ENABLED=0 go build -trimpath -o shiori ./cmd/shiori)`. The adapter only accepts OpenCode versions it has been verified against; after an OpenCode upgrade, update Shiori first.
+
+**Rollback:** run `workplan_doctor` (or `vendor/shiori/shiori doctor --root <project>`) and confirm there are no pending transactions, then swap the entry back to `{ "package": "./packages/workplan-tools" }`. Never register both.
 
 ## cache-guard
 
