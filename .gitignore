@@ -24,3 +24,6 @@ dist/
 .DS_Store
 .vscode/
 .idea/
+
+# Local planning notes, not tracked
+/plans/
