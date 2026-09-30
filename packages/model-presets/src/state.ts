@@ -25,18 +25,30 @@ export interface PresetState {
   noted: Set<string>;
   load: (path: string) => LoadResult;
   warn: (message: string) => void;
+  /** Preset-file load errors; defaults to `warn`. */
+  error: (message: string) => void;
+  /** Recovery notices (the file is valid again after an error). */
+  info: (message: string) => void;
 }
 
 export function createPresetState(
   path: string,
-  deps: { load?: (path: string) => LoadResult; warn?: (message: string) => void } = {},
+  deps: {
+    load?: (path: string) => LoadResult;
+    warn?: (message: string) => void;
+    error?: (message: string) => void;
+    info?: (message: string) => void;
+  } = {},
 ): PresetState {
+  const warn = deps.warn ?? ((m: string) => console.warn(m));
   return {
     path,
     memory: createApplyMemory(),
     noted: new Set(),
     load: deps.load ?? ((p) => loadPresetFile(p)),
-    warn: deps.warn ?? ((m) => console.warn(m)),
+    warn,
+    error: deps.error ?? warn,
+    info: deps.info ?? ((m) => console.info(m)),
   };
 }
 
@@ -44,14 +56,19 @@ export type ReloadResult = { ok: true } | { ok: false; error: string };
 
 /**
  * Re-read the preset file. On error, keep the last good presets, record the
- * error and log it (once per distinct error until the next good load).
+ * error and log it (once per distinct error until the next good load). The
+ * first good load after a logged error logs a recovery notice; other good
+ * loads log nothing.
  */
 export function reloadPresets(state: PresetState): ReloadResult {
   const result = state.load(state.path);
   if (result.ok) {
     state.options = result.options;
     state.lastError = undefined;
-    state.loggedError = undefined;
+    if (state.loggedError !== undefined) {
+      state.loggedError = undefined;
+      state.info(`[${PREFIX}] ${state.path}: preset file is valid again (active: ${result.options.active})`);
+    }
     const note = result.options.note;
     if (note && !state.noted.has(note)) {
       state.noted.add(note);
@@ -62,7 +79,7 @@ export function reloadPresets(state: PresetState): ReloadResult {
   state.lastError = result.error + (state.options ? " (keeping the last good presets)" : "");
   if (state.loggedError !== state.lastError) {
     state.loggedError = state.lastError;
-    state.warn(`[${PREFIX}] ${state.lastError}`);
+    state.error(`[${PREFIX}] ${state.lastError}`);
   }
   return { ok: false, error: state.lastError };
 }

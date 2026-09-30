@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { mkdtempSync, renameSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { applyPresetDefaultModel, applyPresetToAgents, type AgentLike } from "./apply";
@@ -158,7 +158,7 @@ describe("applyFileChange", () => {
 });
 
 /** Minimal fake of the plugin Context covering what setup() touches. */
-function fakeContext(file: string) {
+function fakeContext(file: string, logFile: string | false) {
   type Fn = (editor: unknown) => void;
   // Keyed by registration so re-registering the same callback yields a distinct handle.
   const agentTransforms = new Map<object, Fn>();
@@ -190,8 +190,12 @@ function fakeContext(file: string) {
     return { dispose: async () => void map.delete(key) };
   };
   const ctx = {
-    options: { file },
-    agent: { transform: register(agentTransforms), reload: agentReload },
+    options: { file, logFile },
+    agent: {
+      transform: register(agentTransforms),
+      reload: agentReload,
+      list: async () => ({ data: [...agents].map(([id, a]) => ({ id, model: a.model })) }),
+    },
     model: { transform: register(modelTransforms), reload: modelReload },
     plugin: { list: async () => ({ data: CONFIG_PLUGINS.map((id) => ({ id })) }) },
     command: { transform: async () => void counts.commands++ },
@@ -209,7 +213,8 @@ describe("plugin setup (fake host, real file watcher)", () => {
     const dir = mkdtempSync(join(tmpdir(), "model-presets-plugin-"));
     const path = join(dir, "model-presets.yaml");
     writeFileSync(path, YAML);
-    const host = fakeContext(path);
+    const logPath = join(dir, "logs", "model-presets.log");
+    const host = fakeContext(path, logPath);
     const cleanup = (await modelPresets.setup(host.ctx as never)) as () => void;
     try {
       await sleep(50); // let the config-plugin wait re-register
@@ -240,6 +245,19 @@ describe("plugin setup (fake host, real file watcher)", () => {
       renameSync(tmp, path);
       expect(await until(() => host.snapshot().model === original.model)).toBe(true);
       expect(host.snapshot()).toEqual(original);
+
+      // The log file shows startup, the switch, the broken edit with its
+      // position, and the recovery; no-op reloads add nothing.
+      const lines = readFileSync(logPath, "utf8").trimEnd().split("\n");
+      const messages = lines.map((l) => l.replace(/^\d{4}-\d{2}-\d{2}T\S+Z /, ""));
+      expect(messages[0]).toBe("INFO [model-presets] model preset: openai");
+      expect(messages[1]).toBe("INFO [model-presets] model preset: anthropic (default model anthropic/claude-opus-5-5)");
+      expect(messages[2]).toMatch(new RegExp(`^ERROR \\[model-presets\\] model-presets: ${path}:\\d+:\\d+: YAML error`));
+      expect(messages[3]).toBe(`INFO [model-presets] ${path}: preset file is valid again (active: openai)`);
+      expect(messages[4]).toBe("INFO [model-presets] model preset: openai");
+      expect(messages).toHaveLength(5);
+      await host.agentReload();
+      expect(readFileSync(logPath, "utf8").trimEnd().split("\n")).toHaveLength(5);
     } finally {
       cleanup();
     }

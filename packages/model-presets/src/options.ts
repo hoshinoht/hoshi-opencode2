@@ -1,7 +1,8 @@
 /**
  * Plugin options and preset-file validation for model-presets.
  *
- * Plugin options (opencode.json entry) only locate the preset file:
+ * Plugin options (opencode.json entry) only locate the preset file and,
+ * optionally, the log file (`logFile`: absolute/`~/` path or `false`):
  *
  *   { "package": "./packages/model-presets", "options": { "file": "model-presets.yaml" } }
  *
@@ -20,6 +21,8 @@
  * refers to the preset's `tiers`. Validation errors carry the key path so
  * the file loader can point at the offending line.
  */
+
+import { isAbsolute } from "node:path";
 
 export const PREFIX = "model-presets";
 export const DEFAULT_FILE = "model-presets.yaml";
@@ -52,6 +55,11 @@ export interface PresetOptions {
 export interface PluginOptions {
   /** Preset file; relative paths resolve against the config root. */
   readonly file: string;
+  /**
+   * Log file (absolute or `~/` path); `false` disables it. Omitted = the
+   * default `$XDG_STATE_HOME/opencode/model-presets.log`.
+   */
+  readonly logFile?: string | false;
 }
 
 /** Validation error with the key path of the offending value. */
@@ -70,7 +78,7 @@ const PROVIDER_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const VARIANT_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const TOP_KEYS = new Set(["active", "default", "presets"]);
 const PRESET_KEYS = new Set(["tiers", "default", "agents", "model"]);
-const PLUGIN_KEYS = new Set(["file"]);
+const PLUGIN_KEYS = new Set(["file", "logFile"]);
 
 type Path = readonly (string | number)[];
 
@@ -250,5 +258,12 @@ export function validatePluginOptions(raw: unknown): PluginOptions {
   }
   const file = raw.file ?? DEFAULT_FILE;
   if (typeof file !== "string" || file.trim().length === 0) fail("options.file must be a non-empty string");
-  return { file };
+  const logFile = raw.logFile;
+  if (logFile === undefined) return { file };
+  if (logFile !== false) {
+    if (typeof logFile !== "string" || !(logFile === "~" || logFile.startsWith("~/") || isAbsolute(logFile))) {
+      fail("options.logFile must be an absolute or ~/ path, or false to disable the log file");
+    }
+  }
+  return { file, logFile };
 }

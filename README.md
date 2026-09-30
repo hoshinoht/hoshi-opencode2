@@ -180,6 +180,7 @@ opencode mcp list
 | Change an agent's permissions | edit `scripts/agent-permissions.yaml`, then `bun scripts/gen-agent-permissions.ts` |
 | Change reasoning effort per agent | `providerAgentPolicy` in `opencode.json`; see [docs/agents.md](docs/agents.md) |
 | Switch model presets | set `active:` in `model-presets.yaml`; see [docs/plugins.md](docs/plugins.md#model-presets) |
+| See why a preset did not switch | `tail -f ~/.local/state/opencode/model-presets.log`; see [docs/plugins.md](docs/plugins.md#model-presets-log) |
 | Upgrade OpenCode | bump every `@opencode/plugin` pin to the new version, then `bun install` |
 
 ## Security

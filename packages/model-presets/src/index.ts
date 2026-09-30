@@ -10,18 +10,22 @@
  * The file is re-read on every agent reload and watched: a valid edit reloads
  * agents (and the global default model when the preset's `model` changes)
  * without a restart; a broken edit keeps the last good presets and logs the
- * error with its file:line.
+ * error with its file:line:col. Log lines also go to a log file (default
+ * `$XDG_STATE_HOME/opencode/model-presets.log`, option `logFile`), since the
+ * console is invisible when OpenCode runs as a background service.
  */
 
 import { Plugin } from "@opencode/plugin";
 import {
   applyPresetDefaultModel,
   applyPresetToAgents,
+  presetModelFor,
   type AgentEditorLike,
   type DefaultModelEditorLike,
 } from "./apply";
-import { resolvePresetPath } from "./file";
-import { formatModel, PREFIX, validatePluginOptions } from "./options";
+import { configAgentIds, resolvePresetPath } from "./file";
+import { createLogger, resolveLogPath } from "./log";
+import { formatModel, PREFIX, sameModel, validatePluginOptions, type ModelRef, type ResolvedPreset } from "./options";
 import {
   activePreset,
   agentFingerprint,
@@ -89,6 +93,64 @@ export async function waitForPlugins(
   return false;
 }
 
+/** Agents whose effective model differs from what `preset` asks for. */
+export function findPresetMismatches(
+  agents: readonly { id?: unknown; model?: ModelRef }[],
+  preset: ResolvedPreset,
+): string[] {
+  const out: string[] = [];
+  for (const agent of agents) {
+    const id = String(agent.id);
+    const wanted = presetModelFor(preset, id);
+    if (wanted && !sameModel(agent.model, wanted)) out.push(id);
+  }
+  return out;
+}
+
+export interface EnsureAppliedDeps {
+  listAgents(): Promise<readonly { id?: unknown; model?: ModelRef }[]>;
+  preset(): ResolvedPreset;
+  /** Move our transform after any transforms registered since (e.g. a config reload), then rebuild. */
+  reapply(): Promise<void>;
+  stop(): boolean;
+  warn(message: string): void;
+  info(message: string): void;
+  delaysMs?: readonly number[];
+}
+
+/**
+ * Read the effective agent models back and re-apply until they match the
+ * preset. A host reload (e.g. a hot-reloaded plugin or config change) can
+ * re-register the config layer's transforms after ours, so config models
+ * would win; re-registering puts the preset last again.
+ */
+export async function ensurePresetApplied(deps: EnsureAppliedDeps): Promise<boolean> {
+  const delays = deps.delaysMs ?? [300, 600, 1200, 2500, 5000];
+  let reapplied = false;
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    if (deps.stop()) return false;
+    let mismatched: string[];
+    try {
+      mismatched = findPresetMismatches(await deps.listAgents(), deps.preset());
+    } catch {
+      mismatched = ["?"]; // agent list unavailable yet; retry
+    }
+    if (mismatched.length === 0) {
+      if (reapplied) deps.info(`[${PREFIX}] model preset: ${deps.preset().name} re-applied after the host reloaded agents`);
+      return true;
+    }
+    if (attempt === delays.length) {
+      deps.warn(`[${PREFIX}] preset '${deps.preset().name}' not in effect for: ${mismatched.join(", ")}; restart OpenCode or re-save model-presets.yaml`);
+      return false;
+    }
+    await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+    if (deps.stop()) return false;
+    await deps.reapply();
+    reapplied = true;
+  }
+  return false;
+}
+
 export interface LiveApplyDeps {
   readonly state: PresetState;
   reloadAgents(): Promise<void>;
@@ -124,17 +186,36 @@ export default Plugin.define({
   id: PLUGIN_ID,
   async setup(ctx) {
     const pluginOptions = validatePluginOptions(ctx.options);
-    const state = createPresetState(resolvePresetPath(pluginOptions.file));
+    const log = createLogger({ path: resolveLogPath(pluginOptions.logFile) });
+    const state = createPresetState(resolvePresetPath(pluginOptions.file), {
+      warn: log.warn,
+      error: log.error,
+      info: log.info,
+    });
     reloadPresets(state);
 
+    // True while a watcher-triggered apply runs; it logs the switch itself.
+    let applyingFileChange = false;
+
     let configReady = false;
+    const configAgents = configAgentIds();
     const agentTransform = (editor: unknown) => {
       reloadPresets(state);
       const preset = activePreset(state);
       // Before the config layer is active only built-in agents exist, so
       // unknown-agent warnings would be spurious.
       const result = applyPresetToAgents(editor as AgentEditorLike, preset, state.memory, configReady ? state.warn : undefined);
-      state.appliedAgents = agentFingerprint(preset);
+      // Once the config layer is active, unknown agents mean this rebuild ran
+      // our transform before the config transforms (a host reload re-registered
+      // them after us), so config models would win. Move ours last and rebuild.
+      if (configReady && result.unknown.some((id) => configAgents.has(id))) scheduleOrderFix();
+      const fingerprint = agentFingerprint(preset);
+      // Log to the file only when a different preset takes effect (startup or
+      // a reload that picked up an edit the watcher missed), not every reload.
+      if (fingerprint !== state.appliedAgents && state.options && !applyingFileChange) {
+        log.info(`[${PREFIX}] model preset: ${preset.name}`);
+      }
+      state.appliedAgents = fingerprint;
       if (result.changed.length > 0) {
         console.info(`[${PREFIX}] preset '${preset.name}' set ${result.changed.length} agent model(s)`);
       }
@@ -153,8 +234,64 @@ export default Plugin.define({
       return handles;
     };
     let handles = await register();
+    const reregister = async () => {
+      const previous = handles;
+      handles = await register();
+      for (const handle of previous) await handle.dispose();
+    };
+    let orderFixes = 0;
+    let orderFixPending = false;
+    const scheduleOrderFix = () => {
+      if (orderFixPending || disposed || orderFixes > 5) return;
+      if (orderFixes === 5) {
+        orderFixes++;
+        log.warn(`[${PREFIX}] preset still overridden after repeated re-registration; restart OpenCode or re-save model-presets.yaml`);
+        return;
+      }
+      orderFixes++;
+      orderFixPending = true;
+      setTimeout(() => {
+        void (async () => {
+          try {
+            if (disposed) return;
+            await reregister();
+            await ctx.agent.reload();
+            log.info(`[${PREFIX}] model preset: ${activePreset(state).name} re-applied after the host reloaded agents`);
+          } catch (error) {
+            log.warn(`[${PREFIX}] re-applying preset failed: ${String(error)}`);
+          } finally {
+            orderFixPending = false;
+          }
+        })();
+      }, 250);
+    };
+    const listAgents = async () => {
+      const out = (await (ctx.agent as unknown as { list: () => Promise<unknown> }).list()) as unknown;
+      const data = Array.isArray(out) ? out : ((out as { data?: unknown })?.data ?? []);
+      return data as readonly { id?: unknown; model?: ModelRef }[];
+    };
+    let ensuring: Promise<unknown> = Promise.resolve();
+    const canList = typeof (ctx.agent as unknown as { list?: unknown }).list === "function";
+    const scheduleEnsure = () => {
+      if (!canList) return;
+      ensuring = ensuring
+        .then(() =>
+          ensurePresetApplied({
+            listAgents,
+            preset: () => activePreset(state),
+            reapply: async () => {
+              await reregister();
+              await ctx.agent.reload();
+            },
+            stop: () => disposed,
+            warn: log.warn,
+            info: log.info,
+          }),
+        )
+        .catch((error) => log.warn(`[${PREFIX}] checking preset models failed: ${String(error)}`));
+    };
     if (!models?.transform) {
-      console.warn(`[${PREFIX}] model transforms unavailable; preset 'model' (global default) is ignored`);
+      log.warn(`[${PREFIX}] model transforms unavailable; preset 'model' (global default) is ignored`);
     }
 
     // The host replays transforms in registration order on every rebuild, and
@@ -166,31 +303,37 @@ export default Plugin.define({
     void (async () => {
       const ready = await waitForPlugins(ctx, CONFIG_PLUGINS, () => disposed);
       if (!ready || disposed) {
-        if (!disposed) console.warn(`[${PREFIX}] config plugins not seen; presets may be overridden by config models`);
+        if (!disposed) log.warn(`[${PREFIX}] config plugins not seen; presets may be overridden by config models`);
         return;
       }
-      const previous = handles;
       configReady = true;
-      handles = await register();
-      for (const handle of previous) await handle.dispose();
-    })().catch((error) => console.warn(`[${PREFIX}] transform re-registration failed: ${String(error)}`));
+      await reregister();
+      scheduleEnsure();
+    })().catch((error) => log.warn(`[${PREFIX}] transform re-registration failed: ${String(error)}`));
 
     // Live apply: file edits are serialised so overlapping changes never
     // interleave their reloads.
     let queue: Promise<unknown> = Promise.resolve();
     const onFileChange = () => {
       queue = queue
-        .then(() => {
+        .then(async () => {
           if (disposed) return;
-          return applyFileChange({
-            state,
-            reloadAgents: () => ctx.agent.reload(),
-            ...(models?.reload ? { reloadModels: () => models.reload!() } : {}),
-          });
+          applyingFileChange = true;
+          try {
+            return await applyFileChange({
+              state,
+              reloadAgents: () => ctx.agent.reload(),
+              ...(models?.reload ? { reloadModels: () => models.reload!() } : {}),
+              info: log.info,
+            });
+          } finally {
+            applyingFileChange = false;
+          }
         })
-        .catch((error) => console.warn(`[${PREFIX}] applying preset file change failed: ${String(error)}`));
+        .then(() => scheduleEnsure())
+        .catch((error) => log.warn(`[${PREFIX}] applying preset file change failed: ${String(error)}`));
     };
-    const watcher: PresetWatcher | undefined = watchPresetFile(state.path, onFileChange);
+    const watcher: PresetWatcher | undefined = watchPresetFile(state.path, onFileChange, { warn: log.warn });
 
     return () => {
       disposed = true;

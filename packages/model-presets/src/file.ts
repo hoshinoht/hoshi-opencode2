@@ -5,7 +5,7 @@
  * line.
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { isAbsolute, join, resolve } from "node:path";
 import { LineCounter, parseDocument } from "yaml";
@@ -77,4 +77,17 @@ export function loadPresetFile(path: string, read: (path: string) => string = (p
     };
   }
   return parsePresetYaml(source, path);
+}
+
+/** Agent ids defined as `agents/<id>.md` in the config root (empty if unreadable). */
+export function configAgentIds(root: string = CONFIG_ROOT): Set<string> {
+  try {
+    return new Set(
+      readdirSync(join(root, "agents"))
+        .filter((name) => name.endsWith(".md"))
+        .map((name) => name.slice(0, -3)),
+    );
+  } catch {
+    return new Set();
+  }
 }

@@ -181,4 +181,14 @@ describe("validatePluginOptions", () => {
     expect(() => validatePluginOptions({ presets: {} })).toThrow(/unknown option 'presets'.*preset file/);
     expect(() => validatePluginOptions("x")).toThrow(/options must be an object/);
   });
+
+  it("accepts an absolute or ~/ logFile, or false, and rejects anything else", () => {
+    expect(validatePluginOptions({ logFile: false })).toEqual({ file: DEFAULT_FILE, logFile: false });
+    expect(validatePluginOptions({ logFile: "~/mp.log" })).toEqual({ file: DEFAULT_FILE, logFile: "~/mp.log" });
+    expect(validatePluginOptions({ logFile: "/var/log/mp.log" }).logFile).toBe("/var/log/mp.log");
+    expect(validatePluginOptions({}).logFile).toBeUndefined();
+    for (const bad of ["logs/mp.log", "", true, 1]) {
+      expect(() => validatePluginOptions({ logFile: bad })).toThrow(/options.logFile must be an absolute or ~\/ path, or false/);
+    }
+  });
 });
