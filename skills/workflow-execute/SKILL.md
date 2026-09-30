@@ -39,7 +39,7 @@ For this global harness, when `workplan_validate` is absent, orchestrator can ru
 
 1. Check structural validity and codebase readiness. Request `plan-checker` only when the plan carries consequential migration, security/data, public-contract, rollback, or multi-owner risk and has not already received proportionate review.
 2. Read exact phase/step IDs immediately before each update. Identify the next executable package, prerequisites, owned files, blocked/shared files, integration order and validation target. Recheck stale references when the code changed. Keep each JSON or Markdown update small and serialized.
-3. Load `agent-use`. Delegate bounded engineering to `code-writer` (settled behavior and ownership, reversible local choices allowed), `code-engineer` (slice needing broader bounded judgment), or `frontend-engineer` for UI work, retaining Sol for decisions and integration. Work directly for a small task or when one coherent reasoning context is needed. Delegate only independent meaningful slices with disjoint ownership. Serialize shared-file work.
+3. Load `agent-use`. Delegate bounded engineering to `code-writer` (settled behavior and ownership, reversible local choices allowed), `code-engineer` (slice needing broader bounded judgment), or `frontend-engineer` for UI work, while the orchestrator (parent) keeps decisions and integration. Work directly for a small task or when one coherent reasoning context is needed. Delegate only independent meaningful slices with disjoint ownership. Serialize shared-file work.
 4. Require the worker to run relevant self-checks and return the standard receipt. The parent reconciles outputs, inspects the diff and updates shared state once. Workers do not edit the shared workplan.
 5. Use `tester` for additional specified checks, bug reproduction or collecting high-volume evidence when that saves work. Reuse already valid checks for the same code state. Choose the smallest check capable of exposing a plausible incorrect implementation; add a focused regression test for a reproduced bug when practical, and use property-based tests only where meaningful invariants justify them. A tester reports failures; the implementer fixes them.
 6. For medium/large or consequential changes, obtain a fresh `code-checker` review with exact scope, acceptance criteria, current diff and evidence. Reviewers do not repair the implementation. Track findings durably and return concrete corrections to the appropriate worker.
@@ -52,12 +52,14 @@ For this global harness, when `workplan_validate` is absent, orchestrator can ru
 
 For parallel slices touching the same area, or a slice risky enough to isolate, run one slice per `git worktree` instead of sharing the checkout. This is procedure only — no plugin required.
 
+Lanes require commits (each lane's work reaches the canonical checkout as a branch merge), so use them only when the user has explicitly authorized this plan's execution including commits on lane branches and merging them locally. Without that authorization, do not create lanes: serialize the slices in the shared checkout instead, or ask the user. Authorization to implement is not authorization to commit.
+
 1. The parent creates one worktree per slice: `git worktree add ../<task>-<lane> -b <lane-branch>` from the canonical project root. Record the worktree path and branch in the workplan notes (notes only — no schema changes).
 2. The handoff's Workspace/cwd is the worktree path; owned files keep their usual relative paths. Workers never touch `.opencode/workplan` inside a worktree — workplan state lives in the canonical root and only the parent writes it.
-3. The worker validates inside its worktree and returns the standard receipt. The parent merges each lane (`git merge --no-ff <lane-branch>`, resolving conflicts itself), re-runs the relevant checks on the merged result, then removes the worktree (`git worktree remove ../<task>-<lane>`).
+3. The worker validates inside its worktree, commits its own changes on its lane branch only when the handoff explicitly grants that (never on another branch; otherwise it leaves them uncommitted and the parent commits them on the lane branch), and returns the standard receipt with any commit SHAs. The parent merges each lane (`git merge --no-ff <lane-branch>`, resolving conflicts itself), re-runs the relevant checks on the merged result, then removes the worktree (`git worktree remove ../<task>-<lane>`).
 4. Never push lane branches without explicit user authorization. Never leave stale worktrees behind — remove after merge or on abort, and record the removal in the workplan notes.
 
-Single integrator still holds: workers never merge sibling lanes themselves.
+Single integrator still holds: only the parent (orchestrator) merges; workers never merge, rebase or push any branch.
 
 # State updates
 
@@ -67,7 +69,7 @@ Record review severities as `blocker`, `critical`, `major`, `minor`, `note`, `qu
 
 # Convergence and acceptance
 
-A cycle is implementation/fix → validation → independent review; a substantive failed fix leaves its finding unresolved or introduces a material defect. After two failed substantive fixes, reassess the hypothesis with Sol; consult oracle for contradictory evidence or exceptional uncertainty. Resume the worker for a specific correction when native continuation is available. Stop after three non-converging implementation/review cycles and report remaining evidence and the decision needed. Do not repeat an unchanged failing approach or broaden scope to appease speculative review suggestions.
+A cycle is implementation/fix → validation → independent review; a substantive failed fix leaves its finding unresolved or introduces a material defect. After two failed substantive fixes, the orchestrator (parent) reassesses the hypothesis itself; consult oracle for contradictory evidence or exceptional uncertainty. Resume the worker for a specific correction when native continuation is available. Stop after three non-converging implementation/review cycles and report remaining evidence and the decision needed. Do not repeat an unchanged failing approach or broaden scope to appease speculative review suggestions.
 
 Before marking completed, check the original user outcome, current acceptance evidence, required validation, integration across slices, and absence of unresolved blocker/critical/major findings. An independently reviewed significant change may pass with non-blocking notes. If required verification is unavailable, report that limitation; never invent a passing check. Completion is terminal for the current authorization: after the status is `completed`, do not reopen or extend the plan without an explicit user request.
 

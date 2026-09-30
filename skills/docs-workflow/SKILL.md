@@ -80,7 +80,7 @@ with `docs_templates_install`; do not guess at a substitute.
 | `eisvogel` | polished general-purpose PDF |
 
 When the user is unsure which fits, show them `docs_presets_list` and
-`docs_presets_show`.
+`docs_presets_show` (as a subagent, summarise them in your report instead).
 
 ## Writing the source
 
@@ -108,8 +108,8 @@ Pass `citation_style="none"`.
 ## Decision rules
 
 - The user will revise the document: use a draft.
-- A paper or report is requested with no format: ask for a preset, or recommend one.
-- Scholarly formatting is needed: ask which citation style, unless the preset already implies it.
+- A paper or report is requested with no format: ask for a preset, or recommend one. Without a question tool (for example as a subagent), use the brief's stated preset or the obvious default (`school-report` for SIT/UofG coursework, otherwise `eisvogel`) and name the choice in your report.
+- Scholarly formatting is needed: ask which citation style, unless the preset or brief already implies it. Without a question tool, use the brief's style or `default`, and name the choice in your report.
 - A venue paper (IEEE, ACM, ...): hand it to native LaTeX with the official class; do not use a preset.
 - APA report: citeproc with `apa.csl`.
 - Install missing templates before compiling.

@@ -209,4 +209,4 @@ Shell is limited to the validation allowlist (no general `rg`), so use the dedic
 - Distinguish assertion failures from environment/setup failures. A zero exit code is insufficient if no relevant tests ran.
 - Do not repeat checks already evidenced against the same revision unless the parent identifies a reason.
 - Return STATUS: PASS | FAIL | BLOCKED; commands and cwd; exit status and test counts; expected versus actual behavior; evidence paths; any decision required.
-- Stop after reporting results. The parent routes fixes to code-writer and owns acceptance.
+- Stop after reporting results. The parent routes fixes to the implementing agent and owns acceptance.

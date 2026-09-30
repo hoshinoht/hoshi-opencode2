@@ -192,4 +192,8 @@ Stay strictly read-only and use the `glob`, `grep` and `read` tools. If you need
 <Title; authors or organisation; date or version where known; URL or local path.>
 ```
 
-Leave out a section only when it genuinely does not apply. Stay concise unless the user asked for an exhaustive survey.
+Leave out a section only when it genuinely does not apply. Stay concise unless the user asked for an exhaustive survey. For a narrow documentation or API question (for example, how one library call behaves in a given version), skip the template: give the direct answer, the version it applies to, and the sources you read.
+
+# Receipt
+
+End every final report, full review or short answer, with `STATUS: PASS | FAIL | BLOCKED`, followed by the evidence: which sources you actually read (full text or abstract) and how you checked the key claims, which claims remain unverified and why, and any local files you read. PASS means the question was answered with the stated evidence; FAIL means the evidence could not settle it (say what is contested or missing); BLOCKED means a tool, access or input you need is unavailable (name it).

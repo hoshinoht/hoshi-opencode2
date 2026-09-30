@@ -283,7 +283,9 @@ After each meaningful edit:
 
 1. Compile with `latexmk -pdf -interaction=nonstopmode -halt-on-error
    -file-line-error main.tex`. Use `-xelatex`/`-lualatex` if the preamble needs
-   it, and run from the paper's directory.
+   it. Run it in the paper's directory by setting the shell tool's working
+   directory or by passing `-cd <dir>/main.tex`; do not prefix the command with
+   `cd … &&`, which does not match the pre-approved `latexmk` rule.
 2. If it fails, read the first error in `main.log`, fix the root cause, and
    recompile. Do not paper over errors with `\nonstopmode` hacks or by deleting
    content.
@@ -297,7 +299,6 @@ After each meaningful edit:
    arbitrary code, so read it before the first build.
 
 Report the PDF path, the page count (`pdfinfo`), and any remaining warnings.
-Show the PDF to the user with the browser preview tool when it is available.
 
 # Mode 3: Proofread
 

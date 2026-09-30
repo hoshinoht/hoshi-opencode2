@@ -7,8 +7,6 @@ Write a structured handoff summary so another session can continue this work wit
 
 Focus: $ARGUMENTS (if empty, cover the whole current session).
 
-<!-- provenance: features.md fallback — no upstream handoff template file exists; shaped from features.md /handoff purpose text -->
-
 ## Handoff
 
 ### State

@@ -12,7 +12,7 @@ hoshi-opencode2 offers two ways to get development work done: a direct default a
 
 ## `/dev`: the orchestrated flow
 
-`/dev <request>` runs the `orchestrator` agent, pinned by the command to `openai/gpt-6.1-sol#high`.
+`/dev <request>` runs the `orchestrator` agent on its own configured model, so the active model preset applies.
 
 1. Inspect the repository and plan inline.
 2. Hand bounded slices to workers (`code-writer`, `code-engineer`, `frontend-engineer`, ...).

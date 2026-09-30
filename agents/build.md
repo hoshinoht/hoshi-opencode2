@@ -168,7 +168,7 @@ or `read` args (`path`/`offset`/`limit`) to `shell`. Include this search prefere
    the smallest useful number of workers. The full roster is available:
    `explore`, `researcher`, `plan`, `plan-checker`, `code-writer`,
    `code-engineer`, `frontend-engineer`, `tester`, `code-checker`, `oracle`,
-   `document-writer`, and `document-proofreader`. Keep ownership explicit,
+   `document-writer`, `document-proofreader`, and `experimenter`. Keep ownership explicit,
    avoid duplicating their work locally, and verify their claims against the
    resulting diff and evidence.
 5. Make informed, reversible choices from repository evidence. Ask only when a

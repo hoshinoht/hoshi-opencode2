@@ -6,7 +6,7 @@ metadata:
   version: 0.3.0
   author: Lucas
   tags: ui, ux, hci, gestalt, dashboards, mobile, accessibility, information-architecture
-  related-skills: design-md, popular-web-designs
+  related-skills: frontend-design-studio
 ---
 
 # Frontend Design
@@ -236,7 +236,7 @@ Stable section-local IDs (`HIER-2`, `HPK-4`). Supporting bullets/examples inheri
 
 **VERIFY-2 — Checks.** Orientation; hierarchy/squint; colour/grayscale; HPK; data relationships; targets; semantics/focus/keyboard/zoom/status; states/recovery; localization; reduction; competition; consistency.
 
-## Anti-slop bar (OMO frontend port)
+## Anti-slop bar
 
 **SLOP-1 — Banned defaults.** No generic font stacks (Inter/Roboto/Arial/plain system), no predictable centered-hero-card template layouts, no purple-on-white gradients, no emoji as icons, no animating layout properties (width/height/top/left/margin).
 **SLOP-2 — Icons.** Inline SVG with distinct silhouettes and accessible names; never emoji icons (extends ICON-1–ICON-4).

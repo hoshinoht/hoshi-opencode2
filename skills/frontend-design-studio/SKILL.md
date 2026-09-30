@@ -30,7 +30,9 @@ Before implementation, identify:
 - the real content and edge cases that will expose hierarchy and layout flaws.
 
 If the brief does not identify the subject, propose one concrete interpretation
-and ask for confirmation when the choice materially changes the design.
+and ask for confirmation when the choice materially changes the design. Without
+a question tool (for example as a subagent), return BLOCKED with the proposed
+interpretation instead of building on it.
 
 ## Visual system
 

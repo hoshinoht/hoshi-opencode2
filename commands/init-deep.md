@@ -10,7 +10,7 @@ Scope: $ARGUMENTS (if empty, cover the repository root; otherwise limit to the g
 ## Scope
 
 - This command generates repo-structure guidance (layout, conventions, where things live).
-- Boundary: `commands/recall-distill.md` mines session lessons from past work into AGENTS.md memory blocks; this command uses no session history — it derives guidance from the live repo structure only.
+- Boundary: this command uses no session history (session lessons are out of scope); it derives guidance from the live repo structure only.
 
 ## Workflow
 

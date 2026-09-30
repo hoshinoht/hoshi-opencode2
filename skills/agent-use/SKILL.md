@@ -23,6 +23,9 @@ Use the smallest useful number of workers. Direct work is appropriate for a smal
 | Execute specified validation | tester | cheap deterministic validation |
 | Independent significant-change review | code-checker | consequential reasoning |
 | Exceptional diagnosis / architecture advice | oracle | last resort only; use when genuinely stuck after ordinary investigation |
+| Draft or compile a document (docs plugin) | document-writer | bounded writing execution |
+| Review document quality, evidence and argument | document-proofreader | read-only review |
+| Metric-driven experiment loop in an isolated worktree | experimenter | bounded autonomous iteration; only when the user asked for one |
 
 Agent files own their model assignments; this skill owns routing semantics. Never invent an agent ID or model reference: if a referenced agent is absent from the live OpenCode catalog, use its configured fallback instead of routing around it. Subagents use their configured models; request promotion through the parent rather than assuming a per-call model override exists.
 
@@ -30,9 +33,8 @@ Agent files own their model assignments; this skill owns routing semantics. Neve
 
 Use V2's native `subagent` tool and its live schema. Dispatch calls to configured
 agents as background child sessions by default so the parent remains available
-while they run. Do not copy OMO `task()`, `category`, `task_id`, `team_*`, or
-`run_in_background` syntax unless those fields actually exist in the live
-schema. Retain the returned session identifier for a correction when
+while they run. Use only the fields the live `subagent` schema defines; do not
+invent extra arguments. Retain the returned session identifier for a correction when
 continuation is supported. Use fresh context for independent review.
 
 Every meaningful handoff provides:
@@ -77,9 +79,9 @@ Prefer `code-writer` when behavior and ownership are settled. Reach for `code-en
 
 # Reasoning-router markers
 
-The reasoning-router plugin maps a bounded semantic class to the child's OpenAI reasoning effort; agent policy clamps every request, so caps cannot be bypassed. Two dimensions stay separate: agent selection decides who owns the responsibility, the router decides how much reasoning that child gets. Reasoning escalation changes compute, not authority: a difficult but behaviorally specified slice can stay with its agent on deeper effort, while a change in responsibility — judgment, architecture, contradiction — requires dispatching to the capable agent instead. `[reasoning:deep]` never grants authority beyond a worker's latitude. Fixed-XHigh `code-writer` ignores lower and higher requested classes by design; `explore` routes from low through high.
+The reasoning-router plugin may map a bounded semantic class to the child's reasoning effort, but only for providers the router is configured for; on other providers the markers are harmless no-ops. Agent policy clamps every request, so caps cannot be bypassed. Two dimensions stay separate: agent selection decides who owns the responsibility, the router decides how much reasoning that child gets. Reasoning escalation changes compute, not authority: a difficult but behaviorally specified slice can stay with its agent on deeper effort, while a change in responsibility — judgment, architecture, contradiction — requires dispatching to the capable agent instead. `[reasoning:deep]` never grants authority beyond a worker's latitude. Some agents have a narrow or single-value range (for example `code-writer` on some providers, and `oracle`), so a marker may change nothing for them.
 
-Request classes: `[reasoning:fast]` for lookup/deterministic validation, `[reasoning:balanced]` to explicitly request medium effort, `[reasoning:deep]` for planning/review/debugging/consequential decisions, omit the marker (`auto`) for the agent default. Append `:escalate` only after a failed approach, on contradictory evidence, or for migrations — never preemptively; it moves one level and can never exceed the agent's configured maximum. Never request raw effort values (`low`, `xhigh`, ...): they are ignored. Configured model variant and effective reasoning are different things: the plugin overrides effort immediately before the model call within that agent's band (see the policy table in `packages/reasoning-router/README.md` and any `agentPolicy` in `opencode.json` — do not copy the numbers here). Only delegated child sessions are routed; root/orchestrator sessions keep their configured behavior, and a session that switches agents is re-resolved. Routing is stable per child session (continuations keep their effort), config errors fail fast at setup, runtime failures fall back to the configured variant without breaking dispatch. Only configured providers are routed (default: OpenAI); all others keep their model behavior. Audit with `reasoning_router_status`.
+Request classes: `[reasoning:fast]` for lookup/deterministic validation, `[reasoning:balanced]` to explicitly request a medium level (clamped to the agent's range), `[reasoning:deep]` for planning/review/debugging/consequential decisions, omit the marker (`auto`) for the agent default. Append `:escalate` only after a failed approach, on contradictory evidence, or for migrations — never preemptively; it moves one level and can never exceed the agent's configured maximum. Never request raw effort values: they are ignored. Configured model variant and effective reasoning are different things: the plugin overrides effort immediately before the model call within that agent's band (see the baseline policy table in `packages/reasoning-router/README.md` and the per-provider overrides under `providerAgentPolicy` in `opencode.json` — do not copy the numbers here). Only delegated child sessions are routed; root/orchestrator sessions keep their configured behavior, and a session that switches agents is re-resolved. Routing is stable per child session (continuations keep their effort), config errors fail fast at setup, runtime failures fall back to the configured variant without breaking dispatch. Only providers listed in the router's `providers` option are routed; all others keep their model behavior.
 
 # Ownership and parallelism
 
@@ -114,16 +116,19 @@ execution changes scheduling, not their acceptance responsibility.
 
 # Receipts and promotion
 
-Workers return:
+Every subagent ends its final report with a receipt: a `STATUS:` line followed by the evidence. Agents whose deliverable is itself a report (researcher, document-proofreader, document-writer, experimenter, frontend-engineer in new-design mode) put that report first and the receipt last. The receipt shape:
 
 ```text
 STATUS: PASS | FAIL | BLOCKED
-Changed / Findings: exact files or evidenced findings
+Changed / Findings: exact files touched, or evidenced findings
 Acceptance: criterion -> result or unresolved gap
-Validation: cwd, command, exit status, test counts, evidence path
+Verified: what was checked and how (cwd, command, exit status, test counts, evidence path, sources read)
+Not verified: what could not be checked, and why
 Attempt: hypothesis tested and outcome, if debugging
-Decision required: exact conflict, or none
+Decision required: exact conflict or missing input, or none
 ```
+
+BLOCKED means a missing input, permission or decision stopped the work; the receipt names exactly what is needed. Documented variants: `plan` returns `STATUS: READY | BLOCKED`; `explore` returns PASS or BLOCKED only; `experimenter` maps its loop outcome onto PASS (the metric improved), FAIL (it stopped without improvement: plateau, guard or crash streak, budget) and BLOCKED, and names the stop reason.
 
 PASS means the assigned scope was satisfied with the stated evidence; it does not accept the whole project. Report blocked/unverified checks honestly. The parent checks the diff and receipts, reuses still-valid verification, and uses a fresh code-checker for significant changes.
 

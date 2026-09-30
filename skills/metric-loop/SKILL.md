@@ -17,8 +17,10 @@ what, if anything, gets merged.
 
 ## Inputs
 
-Collect these before starting. If a required one is missing or ambiguous, ask
-once (batched), then proceed.
+Collect these before starting. If a required one is missing or ambiguous and
+you can talk to the user directly, ask once (batched), then proceed. If you run
+as a subagent without a question tool, do not start: return BLOCKED listing the
+exact missing or ambiguous fields.
 
 | Input | Required | Notes |
 |---|---|---|
@@ -64,7 +66,9 @@ once (batched), then proceed.
    git worktree add -b autoresearch/<tag> ../<repo>-autoresearch-<tag> HEAD
    ```
 
-   If the branch already exists, ask whether to resume it or pick a new tag.
+   If the branch already exists, do not reuse or overwrite it on your own. Ask
+   the user whether to resume it or pick a new tag; without a question tool,
+   return BLOCKED naming the existing branch and offering both choices.
 3. `cd` into the worktree for every remaining step. Dependencies or build
    artifacts that live outside git may need the project's normal setup command;
    run it only if it installs nothing system-wide.

@@ -212,15 +212,17 @@ spawn children.
 - `tester`: additional specified checks or reproduction when useful.
 - `code-checker`: independent correctness review of significant changes.
 - `oracle`: last-resort diagnosis or architecture advice; use only when the parent is genuinely stuck after ordinary investigation and bounded workers cannot resolve the issue.
-- Document agents: use only for substantive document work.
+- Document agents (`document-writer`, `document-proofreader`): use only for substantive document work.
+- `experimenter`: a bounded metric-driven experiment loop in an isolated worktree, only when the user asked for one.
 
 Resume a worker for a concrete correction using its returned session identifier when the live tool supports continuation. Start fresh for independent review or an evidenced change of approach. Record failed hypotheses, not just retry counts. A cycle is implementation/fix → validation → independent review; a substantive failed fix leaves its finding unresolved or introduces a material defect. After two unsuccessful substantive fixes, reassess the approach yourself; use Oracle for unresolved or contradictory evidence. Stop a non-converging implementation/review loop after three cycles and report the exact decision or blocker. Never repeat an unchanged failing approach.
 
 ## Reasoning classes for delegation
 
-The reasoning-router plugin maps a bounded semantic class to a delegated
-child's provider-specific reasoning effort (OpenAI or Anthropic). Assess the complexity of the slice first, then start
-the child task text with at most one marker:
+The reasoning-router plugin may map a bounded semantic class to a delegated
+child's reasoning effort when the child's provider is one the router is
+configured for; elsewhere the markers are harmless no-ops. Assess the complexity
+of the slice first, then start the child task text with at most one marker:
 
 1. `fast` — low complexity: file/symbol lookup, deterministic validation
    (`[reasoning:fast]` on explore, tester).
@@ -228,15 +230,15 @@ the child task text with at most one marker:
    the worker's default: bounded implementation, research synthesis.
 3. `deep` — high complexity: uncertain architecture, debugging a failure,
    security-sensitive or destructive work, consequential tradeoffs
-   (`[reasoning:deep]` on plan, code-checker, oracle).
+   (`[reasoning:deep]` on plan, code-checker). Omit the marker for `oracle`:
+   its effort is fixed by agent policy, so a marker there changes nothing.
 4. Escalate (`[reasoning:deep:escalate]`) only after a failed approach, on
    contradictory evidence, or for migrations — never preemptively.
 
 Never request raw effort values (`low`, `xhigh`, ...): they are not markers and
 are ignored. Agent policy clamps every request, so caps cannot be bypassed;
-only configured providers are routed (OpenAI and Anthropic) and all others keep
-their model behavior. Root agents use the active preset's effort, not this child router. Use `reasoning_router_status` to audit the
-effective effort.
+only providers configured in the router are routed and all others keep their
+model behavior. Root agents use the active preset's effort, not this child router.
 
 ## Execution and acceptance
 - Prefer repository conventions. Verify external APIs against installed versions and authoritative documentation when local evidence is insufficient; avoid research for purely local changes.
@@ -244,7 +246,7 @@ effective effort.
 - Parallelize only meaningful independent work with disjoint write ownership and clear dependencies. Do not delegate work and duplicate it locally.
 - Verify worker claims against the diff and relevant evidence. A worker's PASS is a claim about its assignment, not final acceptance of the user's task.
 - Reuse valid checks for the same code state. Run further checks when changes or unresolved risk justify them. For user-facing behavior, include a relevant interaction or smoke check when feasible.
-- At the end of an authorized implementation, review any planner-provided `Lesson candidates` and the completed work for at most three durable, project-specific lessons. Persist only high-confidence lessons that would materially help a future session; skip routine, obvious, transient, or task-specific details. Write accepted lessons only inside the existing `<!-- recall:lessons:begin -->` / `<!-- recall:lessons:end -->` block in the project's `AGENTS.md`, preserving unrelated content and merging with still-valid lessons. Do not modify global `~/.config/opencode/AGENTS.md` autonomously. Mention persisted lessons in the final receipt.
+- At the end of an authorized implementation, review any planner-provided `Lesson candidates` and the completed work for at most three durable, project-specific lessons. Persist only high-confidence lessons that would materially help a future session; skip routine, obvious, transient, or task-specific details. Write accepted lessons only inside an existing `<!-- recall:lessons:begin -->` / `<!-- recall:lessons:end -->` block in the project's `AGENTS.md`, preserving unrelated content and merging with still-valid lessons; if the project has no such block, list the lessons in the final receipt instead of creating one. Do not modify global `~/.config/opencode/AGENTS.md` autonomously. Mention persisted lessons in the final receipt.
 - Review significant changes in a fresh `code-checker` context; return concrete failures to the implementer. You reconcile all slices and own final acceptance.
 - Stop only when the authorized scope is done and verified, or a concrete blocker prevents progress. If a durable workplan exists, mark it terminal (`completed`); otherwise give the normal concise final receipt. Do not keep iterating, dispatch follow-up workers, polish adjacent code, or reopen a completed plan. Any work found after that boundary is new scope and requires explicit user authorization.
 
