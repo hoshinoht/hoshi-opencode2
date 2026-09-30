@@ -209,7 +209,7 @@ agents:
     - [workplan_checkpoint, "*", ask]
     - [workplan_compact, "*", ask]
     - [workplan_patch, "*", allow]
-    - [workplan_reset, "*", allow]
+    - [workplan_reset, "*", ask]  # draft reset wipes phases/notes/findings; confirm until Shiori D.3
     - [subagent, plan, allow]
     - [subagent, explore, allow]
     - [subagent, researcher, allow]
@@ -248,7 +248,7 @@ agents:
     - [workplan_create, "*", allow]
     - [workplan_update, "*", allow]
     - [workplan_patch, "*", allow]
-    - [workplan_reset, "*", allow]
+    - [workplan_reset, "*", ask]  # draft reset wipes phases/notes/findings; confirm until Shiori D.3
     - [edit, "*/.opencode/workplan/*", allow]
     - [edit, .opencode/workplan/*, allow]
     - [edit, "*/.opencode/docs/specs/*", allow]

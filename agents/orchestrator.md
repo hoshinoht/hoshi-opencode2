@@ -105,7 +105,7 @@ permissions:
     effect: allow
   - action: workplan_reset
     resource: "*"
-    effect: allow
+    effect: ask
   - action: subagent
     resource: plan
     effect: allow
