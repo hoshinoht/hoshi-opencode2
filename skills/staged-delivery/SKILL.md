@@ -47,6 +47,11 @@ metadata:
   owner's uncommitted edits.
 - Gate commits on test results: parse the pass/fail counts and require zero
   failures before `git commit`.
+- Don't chain dependent git steps with `&&` after commands that can warn and
+  fail (for example `git add` with a pathspec that names an ignored path).
+  Check each step's exit status, confirm `git show --stat HEAD` holds the
+  intended files under the intended message, and only then record the commit
+  id anywhere.
 - Don't restart or replace things the owner is actively using without saying
   so; prefer changes that apply on their next restart, or verify live state
   immediately after a hot reload.
