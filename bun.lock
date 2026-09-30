@@ -27,6 +27,14 @@
         "yaml": "^2.8.0",
       },
     },
+    "packages/model-presets": {
+      "name": "@hoshi-opencode2/model-presets",
+      "version": "1.0.0",
+      "dependencies": {
+        "@opencode/plugin": "2.0.20",
+        "yaml": "^2.8.0",
+      },
+    },
     "packages/openai-long-context": {
       "name": "@hoshi-opencode2/openai-long-context",
       "version": "1.1.0",
@@ -190,6 +198,8 @@
     "@hoshi-opencode2/cache-guard": ["@hoshi-opencode2/cache-guard@workspace:packages/cache-guard"],
 
     "@hoshi-opencode2/docs": ["@hoshi-opencode2/docs@workspace:packages/docs"],
+
+    "@hoshi-opencode2/model-presets": ["@hoshi-opencode2/model-presets@workspace:packages/model-presets"],
 
     "@hoshi-opencode2/openai-long-context": ["@hoshi-opencode2/openai-long-context@workspace:packages/openai-long-context"],
 

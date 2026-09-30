@@ -129,6 +129,10 @@
       }
     },
     {
+      // Runtime model presets (`/preset`, `/preset <name>`); presets live in model-presets.yaml.
+      "package": "./packages/model-presets"
+    },
+    {
       "package": "./packages/openai-long-context"
     },
 

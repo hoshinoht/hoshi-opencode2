@@ -1,0 +1,67 @@
+# Model presets for the model-presets plugin (packages/model-presets).
+#
+#   /preset          list presets and the effective per-agent models
+#   /preset <name>   switch every agent to that preset
+#
+# Re-read on every /preset and agent reload; a broken edit keeps the last good
+# presets and /preset reports the error with its line.
+#
+# Model strings: provider/model[#variant]. "@name" refers to the preset's tiers.
+# Per preset:
+#   tiers:   optional aliases, e.g. { heavy: anthropic/claude-opus-5-5#high }
+#   default: model for agents not listed under `agents` (omit = leave them unchanged)
+#   model:   global default model (root "model" in opencode.json); no #variant
+#   agents:  explicit per-agent models; general, compaction, summary and title are agents too
+#
+# reasoning-router overrides the reasoning effort for openai and anthropic, so a
+# #variant here is authoritative only for providers the router does not manage.
+
+default: openai
+
+presets:
+  # Agent frontmatter and opencode.json models, unchanged.
+  openai: {}
+
+  # Mirrors the commented `# model:` lines in agents/*.md and the commented
+  # `// "model":` lines in opencode.json. experimenter has no commented model
+  # line, so it keeps its frontmatter model.
+  anthropic:
+    model: anthropic/claude-opus-5-5
+    agents:
+      general: anthropic/claude-opus-5-5#medium
+      compaction: anthropic/claude-opus-5-5#medium
+      summary: openai/gpt-6-luna#low
+      title: openai/gpt-6-luna#low
+      ats-tailor: anthropic/claude-opus-5-5#medium
+      build: anthropic/claude-opus-5-5#medium
+      code-checker: anthropic/claude-opus-5-5#medium
+      code-engineer: anthropic/claude-opus-5-5#medium
+      code-writer: anthropic/claude-opus-5-5#low
+      document-proofreader: anthropic/claude-opus-5-5#low
+      document-writer: anthropic/claude-opus-5-5#medium
+      explore: openai/gpt-6-luna#low
+      frontend-engineer: anthropic/claude-opus-5-5#medium
+      oracle: anthropic/claude-fable-5-1#medium
+      orchestrator: anthropic/claude-opus-5-5#high
+      plan: anthropic/claude-opus-5-5#high
+      plan-checker: anthropic/claude-opus-5-5#medium
+      researcher: anthropic/claude-opus-5-5#medium
+      scholar: anthropic/claude-opus-5-5#medium
+      tester: opencode/muse-spark-1.3-contributor-free#medium
+
+  # Mirrors the `# fallback-model:` lines in agents/*.md; every other agent
+  # (including general, compaction, summary and title) uses `default`.
+  opencode:
+    default: opencode/muse-spark-1.3-contributor-free#high
+    agents:
+      code-writer: opencode/muse-spark-1.3-contributor-free#high
+      document-proofreader: opencode/muse-spark-1.3-contributor-free#high
+      document-writer: opencode/muse-spark-1.3-contributor-free#medium
+      explore: opencode/muse-spark-1.3-contributor-free#high
+      frontend-engineer: opencode/muse-spark-1.3-contributor-free#high
+      oracle: opencode/muse-spark-1.3-contributor-free#xhigh
+      orchestrator: opencode/muse-spark-1.3-contributor-free#medium
+      plan: opencode/muse-spark-1.3-contributor-free#high
+      plan-checker: opencode/muse-spark-1.3-contributor-free#high
+      researcher: opencode/muse-spark-1.3-contributor-free#high
+      tester: opencode/muse-spark-1.3-contributor-free#medium
