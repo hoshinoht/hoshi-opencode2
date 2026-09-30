@@ -45,6 +45,7 @@ Secrets never go into git; `opencode.json` refers to them only through `{env:...
 | Secret | Where it goes |
 |---|---|
 | `CONTEXT7_API_KEY` | your environment, or `.env` |
+| `ATS_TAILOR_PROJECT`, `ATS_TAILOR_DATA` (optional, for the disabled [`ats-tailor`](https://github.com/hoshinoht/ats-tailor) MCP) | environment variables: a checkout of ats-tailor, and your own resume repository with its index |
 | Exa API key (optional, for gofetch) | `~/.config/opencode/.exa-api-key`, mode `600` |
 
 Without an Exa key, gofetch falls back to keyless DuckDuckGo/Mojeek search.
@@ -54,7 +55,8 @@ Machine-local files are git-ignored: `.env`, `.env.*`, `.exa-api-key`, and `serv
 ### 5. Verify
 
 ```sh
-opencode mcp list      # or `opencode2 mcp list` if V2 is installed alongside V1
+opencode api GET /api/plugin   # every plugin should report "active"
+opencode api GET /api/config   # resolved config, including MCP servers
 ```
 
 Start a fresh session after changing config or plugins; a running session may not pick the change up.

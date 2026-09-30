@@ -28,7 +28,7 @@
 | **Entry points** | `build` (default) for everyday work · `/dev` for orchestrated features · `scholar` for papers |
 | **Agents** | 17: 4 primary, 1 dual-mode (`plan`), 12 subagents, each with generated least-privilege permissions |
 | **Plugins** | reasoning-router · model-presets · openai-long-context · usage-tracker · shiori (workplan) · cache-guard · docs |
-| **MCP servers** | gofetch · researcher-mcp · context7 · deepwiki · grep_app · lsp-tools |
+| **MCP servers** | [gofetch](https://github.com/hoshinoht/gofetch-mcp) · [researcher-mcp](https://github.com/hoshinoht/researcher-mcp) · context7 · deepwiki · grep_app · lsp-tools · [ats-tailor](https://github.com/hoshinoht/ats-tailor) (disabled by default) |
 | **Skills** | 17 [Agent Skills](https://agentskills.io), most of them platform-agnostic |
 
 ## Features
@@ -172,8 +172,8 @@ bun install
 make -C mcps/gofetch-mcp build
 (cd mcps/researcher-mcp && go build -o bin/researcher-mcp ./cmd/google-scholar-mcp)
 
-# 4. Check
-opencode mcp list
+# 4. Check: every plugin should report "active"
+opencode api GET /api/plugin
 ```
 
 **Next steps:**

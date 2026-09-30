@@ -113,3 +113,9 @@ The pandoc-based document generator that provides the `docs_*` tools used by `do
 - Venue papers are **not** a docs-plugin job: `scholar` writes them in native LaTeX with the official class (`IEEEtran`, `acmart`, ...).
 - Citation handling is chosen with `citation_style`.
 - Templates and logos ship inside the package: `packages/docs/pandoc/templates/{sit-uofg,eisvogel}` and `packages/docs/pandoc/assets/`. `~/.config/opencode/pandoc/` is an optional user override.
+
+## Related projects
+
+- [gofetch-mcp](https://github.com/hoshinoht/gofetch-mcp) and [researcher-mcp](https://github.com/hoshinoht/researcher-mcp): MCP servers vendored as submodules under `mcps/`.
+- [ats-tailor](https://github.com/hoshinoht/ats-tailor): resume-tailoring MCP used by the hidden `ats-tailor` agent; disabled by default (see [install](install.md)).
+- [Shiori](https://github.com/hoshinoht/shiori): the workplan engine behind the `workplan_*` tools, vendored at `vendor/shiori`.

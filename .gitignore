@@ -27,3 +27,6 @@ dist/
 
 # Local planning notes, not tracked
 /plans/
+
+# This repo's own workplans, specs and backlog (local working notes)
+/.opencode/

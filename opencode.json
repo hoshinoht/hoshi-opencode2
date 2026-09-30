@@ -64,8 +64,11 @@
         "command": [
           "sh",
           "-c",
-          "uv run --project $HOME/projects/personal/resume/ats-tailor ats-tailor mcp --repo $HOME/projects/personal/resume"
+          "uv run --project \"$ATS_TAILOR_PROJECT\" ats-tailor mcp --repo \"$ATS_TAILOR_DATA\""
         ],
+        // https://github.com/hoshinoht/ats-tailor — set ATS_TAILOR_PROJECT (tool checkout) and
+        // ATS_TAILOR_DATA (your resume repository) in the environment OpenCode starts in.
+        "environment": { "ATS_TAILOR_PROJECT": "{env:ATS_TAILOR_PROJECT}", "ATS_TAILOR_DATA": "{env:ATS_TAILOR_DATA}" },
         "timeout": {
           "execution": 300000
         },
