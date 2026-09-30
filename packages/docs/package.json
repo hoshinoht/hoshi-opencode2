@@ -1,0 +1,17 @@
+{
+  "name": "@hoshi-opencode2/docs",
+  "version": "1.0.0",
+  "description": "OpenCode V2 pandoc/LaTeX document drafting and PDF compilation tools",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test": "bun test src/"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.0.20",
+    "yaml": "^2.8.0"
+  }
+}

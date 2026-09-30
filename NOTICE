@@ -1,0 +1,31 @@
+hoshi-opencode2
+Copyright (C) 2026 hoshinoht
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. See LICENSE.
+
+Third-party components included in this repository keep their own licenses:
+
+- skills/shell-strategy/          MIT, Copyright (c) 2025 JRedeker (see its LICENSE)
+- skills/frontend-design/         MIT, author Lucas (declared in SKILL.md frontmatter)
+- mcps/lsp-tools-mcp/             MIT (see its LICENSE and NOTICE)
+- packages/usage-tracker/        Provider targets and quota concepts adapted from the
+                                  MIT-licensed opencode-usage-tracker by Dylan Liew;
+                                  independent implementation.
+- skills/logo-design/            Adapted, lightweight version of logo-design-skill;
+                                  MIT, Copyright (c) 2026 Kaan Kızıltuğ (kaankiziltug),
+                                  https://github.com/kaankiziltug/logo-design-skill
+                                  (see skills/logo-design/LICENSE).
+- skills/metric-loop/, agents/experimenter.md, commands/autoresearch.md
+                                  Original work; concept inspired by the MIT-licensed
+                                  autoresearch by Udit Goenka
+                                  (https://github.com/uditgoenka/autoresearch).
+- packages/docs/pandoc/templates/eisvogel.latex
+                                  BSD-3-Clause, Copyright (c) Pascal Wagler and
+                                  John MacFarlane (see file header)
+- packages/docs/pandoc/assets/sit-logo.png, packages/docs/pandoc/assets/uofg-logo.png
+                                  Trademarks of Singapore Institute of Technology
+                                  and the University of Glasgow; not covered by
+                                  this project's license.

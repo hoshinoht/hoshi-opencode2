@@ -1,0 +1,157 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "build",
+  "update": "notify",
+  "share": "disabled",
+  "experimental": {
+    "subagent_depth": 2
+  },
+  "agents": {
+
+    "general": {
+      "model": "openai/gpt-5.6-terra-1m#high"
+      // "model": "anthropic/claude-opus-5-5#medium"
+    },
+    "compaction": {
+      "model": "openai/gpt-5.6-terra-1m#high"
+      // "model": "anthropic/claude-opus-5-5#medium"
+    },
+    "summary": {
+      "model": "openai/gpt-6-luna#low"
+      //"model": "openai/gpt-6-luna#low"
+    },
+    "title": {
+      "model": "openai/gpt-6-luna#low"
+      // "model": "openai/gpt-6-luna#low"
+    }
+  },
+  "mcp": {
+    "servers": {
+      "deepwiki": {
+        "type": "remote",
+        "url": "https://mcp.deepwiki.com/mcp",
+        "disabled": false
+      },
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp",
+        "headers": {
+          "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
+        },
+        "disabled": false
+      },
+      "researcher-mcp": {
+        "type": "local",
+        "command": [
+          "sh",
+          "-c",
+          "$HOME/.config/opencode/mcps/researcher-mcp/bin/researcher-mcp"
+        ],
+        "disabled": false
+      },
+      "gofetch": {
+        "type": "local",
+        "command": [
+          "sh",
+          "-c",
+          "$HOME/.config/opencode/mcps/gofetch-mcp/bin/gofetch"
+        ],
+        "codemode": false,
+        "disabled": false
+      },
+      "ats-tailor": {
+        "type": "local",
+        "command": [
+          "sh",
+          "-c",
+          "uv run --project $HOME/projects/personal/resume/ats-tailor ats-tailor mcp --repo $HOME/projects/personal/resume"
+        ],
+        "timeout": {
+          "execution": 300000
+        },
+        "disabled": true
+      },
+      "lsp-tools": {
+        "type": "local",
+        "command": [
+          "sh",
+          "-c",
+          "node $HOME/.config/opencode/mcps/lsp-tools-mcp/mcp-no-idle.mjs"
+        ],
+        "environment": {
+          "LSP_TOOLS_MCP_PROJECT_CONFIG": ".opencode/lsp.json",
+          "LSP_TOOLS_MCP_USER_CONFIG": ".config/opencode/lsp.json"
+        },
+        "disabled": false
+      },
+      "grep_app": {
+        "type": "remote",
+        "url": "https://mcp.grep.app",
+        "oauth": false,
+        "disabled": false
+      }
+    }
+  },
+  "plugins": [
+    // The custom plan agent owns repository artifacts, not ~/.opencode/plan.
+    "-opencode.plan",
+    {
+      "package": "./packages/reasoning-router",
+      "options": {
+        "diagnosticsLimit": 100,
+        "providers": {
+          "openai": {},
+          "anthropic": { "option": "effort", "efforts": ["low", "medium", "high"] }
+        },
+        "providerAgentPolicy": {
+          // Router efforts override agent `#variant`s; keep these in sync with agents/*.md.
+          "openai": {
+            "explore": { "def": "low", "min": "low", "max": "medium" },
+            "code-writer": { "def": "max", "min": "xhigh", "max": "max" },
+            "code-engineer": { "def": "high", "min": "medium", "max": "high" },
+            "frontend-engineer": { "def": "medium", "min": "medium", "max": "high" }
+          },
+          "anthropic": {
+            "explore": { "def": "low", "min": "low", "max": "medium" },
+            "tester": { "def": "low", "min": "low", "max": "medium" },
+            "code-writer": { "def": "medium", "min": "low", "max": "medium" },
+            "code-engineer": { "def": "medium", "min": "medium", "max": "high" },
+            "frontend-engineer": { "def": "medium", "min": "low", "max": "medium" },
+            "researcher": { "def": "medium", "min": "low", "max": "medium" },
+            "document-writer": { "def": "medium", "min": "low", "max": "medium" },
+            "document-proofreader": { "def": "low", "min": "low", "max": "medium" },
+            "plan": { "def": "high", "min": "medium", "max": "high" },
+            "plan-checker": { "def": "medium", "min": "medium", "max": "high" },
+            "code-checker": { "def": "medium", "min": "low", "max": "high" },
+            "oracle": { "def": "medium", "min": "medium", "max": "medium" }
+          }
+        }
+      }
+    },
+    {
+      "package": "./packages/openai-long-context"
+    },
+
+    {
+      "package": "./packages/usage-tracker"
+    },
+    {
+      "package": "./packages/workplan-tools"
+    },
+    {
+      "package": "./packages/docs"
+    },
+    {
+      "package": "./packages/cache-guard",
+      "options": {
+        "mode": "advisory",
+        "riskAfterMinutes": 30,
+        "minCacheReadTokens": 10000
+      }
+    },
+    "@ex-machina/opencode-anthropic-auth@next"
+  ],
+  "providers": {},
+  "model": "openai/gpt-5.6-terra-1m"
+  // "model": "anthropic/claude-opus-5-5"
+}

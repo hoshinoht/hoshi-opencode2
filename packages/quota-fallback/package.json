@@ -1,0 +1,21 @@
+{
+  "name": "@hoshi-opencode2/quota-fallback",
+  "version": "1.0.0",
+  "description": "V2-only OpenCode plugin: configurable quota-triggered model failover with circuit breaker",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/hoshinoht/hoshi-opencode2.git",
+    "directory": "packages/quota-fallback"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test": "bun test src/"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.0.20"
+  }
+}

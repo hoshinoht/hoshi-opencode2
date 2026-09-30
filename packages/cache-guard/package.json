@@ -1,0 +1,10 @@
+{
+  "name": "@hoshi-opencode2/cache-guard",
+  "version": "1.0.0",
+  "description": "OpenCode V2 heuristic guard for at-risk OpenAI prompt-cache reuse",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": { ".": "./index.ts", "./tui": "./tui.ts" },
+  "scripts": { "test": "bun test src/" },
+  "dependencies": { "@opencode/plugin": "2.0.20" }
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "workplan-tools-hardening",
+  "sourceUpdatedAt": "2026-09-30T07:33:15.557Z",
+  "planHash": "4458dfe128ee2599456ab7545494a5407a3c6cfe4f17388e8069605adf9ca8b3",
+  "manifest": [
+    {
+      "path": ".opencode/workplan/workplan-tools-hardening.json",
+      "sha256": "91007db2e1e0d968df7549b80a0e8cd188867cad3b97e3ed6c70084c5a885d10"
+    },
+    {
+      "path": ".opencode/workplan/workplan-tools-hardening.md",
+      "sha256": "ad086c66afd234963c90ae79e0ba92d697965e875c4425a527d42858bcfcb0a1"
+    }
+  ],
+  "evidenceStatus": "unverified",
+  "createdAt": "2026-09-30T01:39:14.241Z",
+  "updatedAt": "2026-09-30T07:34:07.079Z",
+  "status": "completed",
+  "summary": "COMPLETED and verified: all eight hardening requirements, thirteen native tools, safe transactions/recovery, full schemas/freshness/preview/bounded resume/doctor, exact native permissions. Final integrated review PASS with no material findings. Source work is terminal; no additional changes under this authorization.",
+  "current": null,
+  "nextAction": "none — complete. Separately authorized next task: prepare Shiori Go-core/performance/data-structure/worktree specifications in git@github.com:hoshinoht/shiori.git; no Go implementation or commits/push.",
+  "blockers": [],
+  "recentValidation": [
+    "Full workplan56pass2optin skip605expectations; typecheckpass",
+    "Optin bridge/lifecycle actual2.0.19/client2.0.20 smokes separatelypass; finalaffected lifecycle1pass3assertions",
+    "Parentactualminbudget3892chars4096; live13tools/doctor and real native checkpointwrite verified",
+    "Agent-config3pass12assertions; structuralhelpervalid; diff-checkpass",
+    "Independentintegratedreview PASS; stale/incompletedataflow reportswithdrawn on exactevidence",
+    "Broad325pass24fail1error unchangedfailurelist outsideworkplan scope"
+  ],
+  "guardrails": [
+    "Current workplan terminal; no sourcepolish/Goimplementation/migration/renames beyond separatelyauthorized specs.",
+    "Preserve originaluserchanges/globalAGENTS; no commits/push/deploy/systempackages/service restarts.",
+    "Shiori specsnextrepo git@github.com:hoshinoht/shiori.git; modulepath github.com/hoshinoht/shiori; userrepo no remotechangesauthorized."
+  ],
+  "references": [
+    ".opencode/workplan/workplan-tools-hardening.md",
+    ".opencode/backlog/workplan-performance.md",
+    "README.md"
+  ]
+}

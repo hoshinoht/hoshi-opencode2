@@ -1,0 +1,23 @@
+{
+  "name": "@hoshi-opencode2/reasoning-router",
+  "version": "1.0.0",
+  "description": "V2-only OpenCode plugin: deterministic semantic-class routing to OpenAI reasoning effort for subagents",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/hoshinoht/hoshi-opencode2.git",
+    "directory": "packages/reasoning-router"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./rpc": "./src/rpc.ts",
+    "./tui": "./src/tui.ts"
+  },
+  "scripts": {
+    "test": "bun test src/"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.0.20"
+  }
+}

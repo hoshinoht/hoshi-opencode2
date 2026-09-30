@@ -1,0 +1,9 @@
+{
+  "name": "native-workplan-lifecycle-runtime-harness",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  }
+}

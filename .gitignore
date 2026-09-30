@@ -1,0 +1,26 @@
+# Workspace dependencies (bun install). bun.lock is tracked.
+node_modules/
+package-lock.json
+
+# Secrets and machine-local state
+.env
+.env.*
+.exa-api-key
+service.json
+opencode-notifier-state.json
+
+# Build and test output
+dist/
+*.js.map
+*.test.pdf
+*.log
+*.tmp
+
+# The vendored lsp-tools MCP ships its built runtime so it works without a build step
+!mcps/lsp-tools-mcp/dist/
+!mcps/lsp-tools-mcp/package-lock.json
+
+# OS / editor noise
+.DS_Store
+.vscode/
+.idea/

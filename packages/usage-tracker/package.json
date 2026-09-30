@@ -1,0 +1,28 @@
+{
+  "name": "@hoshi-opencode2/usage-tracker",
+  "version": "1.0.0",
+  "description": "OpenCode V2 usage tracker for GitHub Copilot and OpenAI/Codex",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/hoshinoht/hoshi-opencode2.git",
+    "directory": "packages/usage-tracker"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./rpc": "./src/rpc.ts",
+    "./tui": "./tui.ts"
+  },
+  "scripts": {
+    "test": "bun test src/"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.0.20"
+  },
+  "peerDependencies": {
+    "@opentui/core": ">=0.5.10",
+    "@opentui/solid": ">=0.5.10",
+    "solid-js": ">=1.9.0"
+  }
+}
