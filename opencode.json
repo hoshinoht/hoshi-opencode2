@@ -129,7 +129,7 @@
       }
     },
     {
-      // Runtime model presets (`/preset`, `/preset <name>`); presets live in model-presets.yaml.
+      // Model presets: pick one with `active:` in model-presets.yaml (applied live on save).
       "package": "./packages/model-presets"
     },
     {

@@ -32,14 +32,12 @@ export interface DefaultModelEditorLike {
 }
 
 export interface ApplyMemory {
-  /** Effective model per agent after the last pass (for `/preset` listings). */
-  effective: Map<string, { model: ModelRef | undefined; overridden: boolean }>;
   /** Unknown agent ids already warned about, keyed `preset:agent`. */
   warned: Set<string>;
 }
 
 export function createApplyMemory(): ApplyMemory {
-  return { effective: new Map(), warned: new Set() };
+  return { warned: new Set() };
 }
 
 function copyRef(ref: ModelRef | undefined): ModelRef | undefined {
@@ -73,14 +71,12 @@ export function applyPresetToAgents(
   const agents = editor.list();
   const seen = new Set<string>();
   const changed: string[] = [];
-  memory.effective.clear();
 
   for (const agent of agents) {
     const id = String(agent.id);
     seen.add(id);
     const original = copyRef(agent.model);
     const wanted = presetModelFor(preset, id);
-    const target = wanted ?? original;
 
     if (wanted && !sameModel(original, wanted)) {
       editor.update(id, (draft) => {
@@ -90,8 +86,6 @@ export function applyPresetToAgents(
       });
       changed.push(id);
     }
-
-    memory.effective.set(id, { model: target, overridden: wanted !== undefined });
   }
 
   const unknown = Object.keys(preset.agents).filter((id) => !seen.has(id));

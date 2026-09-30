@@ -1,7 +1,8 @@
 /**
  * Preset file loading. The file is YAML (comments allowed) and is re-read on
- * every agent reload and `/preset` invocation; a broken edit keeps the last
- * good presets and surfaces the error with file path and line.
+ * every agent reload and whenever the file watcher sees an edit; a broken
+ * edit keeps the last good presets and surfaces the error with file path and
+ * line.
  */
 
 import { readFileSync } from "node:fs";

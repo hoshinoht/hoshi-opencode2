@@ -2,14 +2,15 @@
  * model-presets — V2-only OpenCode plugin.
  *
  * Switches every agent's model (including the built-in general, compaction,
- * summary and title roles) between named, provider-agnostic presets at
- * runtime. Presets live in a YAML file (default `model-presets.yaml` in the
- * config root) that is re-read on every agent reload and `/preset`
- * invocation. The active preset name is kept in plugin storage.
+ * summary and title roles) between named, provider-agnostic presets. Presets
+ * live in a YAML file (default `model-presets.yaml` in the config root) whose
+ * top-level `active` key selects the preset in effect; `default` is accepted
+ * as a deprecated alias.
  *
- * `/preset` lists presets and the effective per-agent models; `/preset <name>`
- * switches and reloads agents. Replies are written into the session as
- * synthetic messages with `resume: false`, so no model call is triggered.
+ * The file is re-read on every agent reload and watched: a valid edit reloads
+ * agents (and the global default model when the preset's `model` changes)
+ * without a restart; a broken edit keeps the last good presets and logs the
+ * error with its file:line.
  */
 
 import { Plugin } from "@opencode/plugin";
@@ -19,10 +20,18 @@ import {
   type AgentEditorLike,
   type DefaultModelEditorLike,
 } from "./apply";
-import { COMMAND_NAME, runPresetCommand } from "./command";
 import { resolvePresetPath } from "./file";
-import { PREFIX, validatePluginOptions } from "./options";
-import { activePreset, createPresetState, loadStoredName, reloadPresets, STORAGE_KEY } from "./state";
+import { formatModel, PREFIX, validatePluginOptions } from "./options";
+import {
+  activePreset,
+  agentFingerprint,
+  createPresetState,
+  modelFingerprint,
+  pendingReloads,
+  reloadPresets,
+  type PresetState,
+} from "./state";
+import { watchPresetFile, type PresetWatcher } from "./watch";
 
 export const PLUGIN_ID = "model-presets";
 
@@ -80,13 +89,43 @@ export async function waitForPlugins(
   return false;
 }
 
+export interface LiveApplyDeps {
+  readonly state: PresetState;
+  reloadAgents(): Promise<void>;
+  /** Reloads the global default model; omitted when model transforms are unavailable. */
+  reloadModels?: () => Promise<void>;
+  info?: (message: string) => void;
+}
+
+/**
+ * Handle a preset file change: re-read it and, when it is valid and the
+ * active preset's effective models differ from what was last applied, reload
+ * agents (and the global default model if the preset's `model` changed).
+ * An invalid file keeps the last good presets; the error is logged by
+ * `reloadPresets`. Returns what was reloaded.
+ */
+export async function applyFileChange(deps: LiveApplyDeps): Promise<{ ok: boolean; agents: boolean; model: boolean }> {
+  const { state } = deps;
+  const info = deps.info ?? ((m: string) => console.info(m));
+  const loaded = reloadPresets(state);
+  if (!loaded.ok) return { ok: false, agents: false, model: false };
+  const pending = pendingReloads(state);
+  const model = pending.model && deps.reloadModels !== undefined;
+  if (pending.agents) await deps.reloadAgents();
+  if (model) await deps.reloadModels!();
+  if (pending.agents || model) {
+    const preset = activePreset(state);
+    info(`[${PREFIX}] model preset: ${preset.name}${preset.model ? ` (default model ${formatModel(preset.model)})` : ""}`);
+  }
+  return { ok: true, agents: pending.agents, model };
+}
+
 export default Plugin.define({
   id: PLUGIN_ID,
   async setup(ctx) {
     const pluginOptions = validatePluginOptions(ctx.options);
     const state = createPresetState(resolvePresetPath(pluginOptions.file));
     reloadPresets(state);
-    state.stored = await loadStoredName(ctx.storage, state.warn);
 
     let configReady = false;
     const agentTransform = (editor: unknown) => {
@@ -95,6 +134,7 @@ export default Plugin.define({
       // Before the config layer is active only built-in agents exist, so
       // unknown-agent warnings would be spurious.
       const result = applyPresetToAgents(editor as AgentEditorLike, preset, state.memory, configReady ? state.warn : undefined);
+      state.appliedAgents = agentFingerprint(preset);
       if (result.changed.length > 0) {
         console.info(`[${PREFIX}] preset '${preset.name}' set ${result.changed.length} agent model(s)`);
       }
@@ -102,7 +142,9 @@ export default Plugin.define({
     const models = modelDomain(ctx);
     const modelTransform = (editor: unknown) => {
       const target = defaultEditor(editor);
-      if (target) applyPresetDefaultModel(target, activePreset(state));
+      const preset = activePreset(state);
+      if (target) applyPresetDefaultModel(target, preset);
+      state.appliedModel = modelFingerprint(preset);
     };
 
     const register = async () => {
@@ -133,49 +175,26 @@ export default Plugin.define({
       for (const handle of previous) await handle.dispose();
     })().catch((error) => console.warn(`[${PREFIX}] transform re-registration failed: ${String(error)}`));
 
-    const activate = async (name: string) => {
-      const before = activePreset(state);
-      await ctx.storage.set(STORAGE_KEY, name);
-      state.stored = name;
-      await ctx.agent.reload();
-      const after = activePreset(state);
-      if (models?.reload && (before.model || after.model)) await models.reload();
+    // Live apply: file edits are serialised so overlapping changes never
+    // interleave their reloads.
+    let queue: Promise<unknown> = Promise.resolve();
+    const onFileChange = () => {
+      queue = queue
+        .then(() => {
+          if (disposed) return;
+          return applyFileChange({
+            state,
+            reloadAgents: () => ctx.agent.reload(),
+            ...(models?.reload ? { reloadModels: () => models.reload!() } : {}),
+          });
+        })
+        .catch((error) => console.warn(`[${PREFIX}] applying preset file change failed: ${String(error)}`));
     };
-
-    await ctx.command.transform((editor) => {
-      editor.add({
-        name: COMMAND_NAME,
-        description: "Model presets: /preset lists them, /preset <name> switches every agent's model",
-        execute: async (input) => {
-          let reply: string;
-          try {
-            reply = await runPresetCommand(input.prompt?.text, {
-              state,
-              activate,
-              refresh: () => ctx.agent.reload(),
-            });
-          } catch (error) {
-            reply = `[${PREFIX}] /${COMMAND_NAME} failed: ${String(error)}`;
-          }
-          try {
-            await ctx.session.synthetic({
-              sessionID: input.sessionID,
-              text: reply,
-              description: `/${COMMAND_NAME}`,
-              metadata: { plugin: PLUGIN_ID },
-              delivery: input.delivery,
-              resume: false,
-            });
-          } catch (error) {
-            console.warn(`[${PREFIX}] could not reply into session ${input.sessionID}: ${String(error)}`);
-            console.info(reply);
-          }
-        },
-      });
-    });
+    const watcher: PresetWatcher | undefined = watchPresetFile(state.path, onFileChange);
 
     return () => {
       disposed = true;
+      watcher?.close();
     };
   },
 });

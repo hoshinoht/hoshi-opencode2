@@ -68,7 +68,7 @@ describe("tier resolution", () => {
 
 describe("validatePresets", () => {
   const good = {
-    default: "openai",
+    active: "openai",
     presets: {
       openai: {},
       anthropic: {
@@ -82,7 +82,8 @@ describe("validatePresets", () => {
 
   it("resolves a full config", () => {
     const options = validatePresets(good);
-    expect(options.default).toBe("openai");
+    expect(options.active).toBe("openai");
+    expect(options.note).toBeUndefined();
     expect(options.presets.openai).toEqual({ name: "openai", agents: {} });
     const anthropic = options.presets.anthropic!;
     expect(anthropic.defaultModel).toEqual({ providerID: "anthropic", id: "claude-opus-5-5", variant: "high" });
@@ -94,17 +95,17 @@ describe("validatePresets", () => {
   it("requires a mapping and at least one preset", () => {
     expect(() => validatePresets(undefined)).toThrow(/must be a mapping/);
     expect(() => validatePresets([])).toThrow(/must be a mapping/);
-    expect(() => validatePresets({ default: "a", presets: {} })).toThrow(/at least one preset/);
+    expect(() => validatePresets({ active: "a", presets: {} })).toThrow(/at least one preset/);
     expect(() => validatePresets({ default: "a" })).toThrow(/'presets' must be a mapping/);
   });
 
   it("accepts a bare (null) preset as no overrides", () => {
-    expect(validatePresets({ default: "a", presets: { a: null } }).presets.a).toEqual({ name: "a", agents: {} });
+    expect(validatePresets({ active: "a", presets: { a: null } }).presets.a).toEqual({ name: "a", agents: {} });
   });
 
   it("carries the key path of the offending value", () => {
     try {
-      validatePresets({ default: "a", presets: { a: { agents: { explore: "bad" } } } });
+      validatePresets({ active: "a", presets: { a: { agents: { explore: "bad" } } } });
       throw new Error("expected failure");
     } catch (error) {
       expect(error).toBeInstanceOf(PresetError);
@@ -112,43 +113,59 @@ describe("validatePresets", () => {
     }
   });
 
-  it("rejects an unknown default preset", () => {
+  it("rejects an unknown or missing active preset", () => {
+    expect(() => validatePresets({ active: "nope", presets: { a: {} } })).toThrow(
+      "model-presets: active 'nope' is not a preset (known: a)",
+    );
+    expect(() => validatePresets({ presets: { a: {} } })).toThrow(/'active' must name a preset \(known: a\)/);
+    expect(() => validatePresets({ active: 3, presets: { a: {} } })).toThrow(/'active' must name a preset/);
+  });
+
+  it("accepts the top-level `default` as a deprecated alias for `active`", () => {
+    const alias = validatePresets({ default: "b", presets: { a: {}, b: {} } });
+    expect(alias.active).toBe("b");
+    expect(alias.note).toBe("top-level 'default' is deprecated; rename it to 'active'");
     expect(() => validatePresets({ default: "nope", presets: { a: {} } })).toThrow(
       "model-presets: default 'nope' is not a preset (known: a)",
     );
-    expect(() => validatePresets({ presets: { a: {} } })).toThrow(/'default' must name a preset/);
+  });
+
+  it("lets `active` win over `default` (which is then not validated)", () => {
+    const both = validatePresets({ active: "a", default: "gone", presets: { a: {}, b: {} } });
+    expect(both.active).toBe("a");
+    expect(both.note).toMatch(/both 'active' and the deprecated top-level 'default' are set; using active 'a'/);
   });
 
   it("rejects unknown keys at both levels", () => {
-    expect(() => validatePresets({ default: "a", presets: { a: {} }, extra: 1 })).toThrow(/unknown top-level key 'extra'/);
-    expect(() => validatePresets({ default: "a", presets: { a: { agent: {} } } })).toThrow(
+    expect(() => validatePresets({ active: "a", presets: { a: {} }, extra: 1 })).toThrow(/unknown top-level key 'extra'/);
+    expect(() => validatePresets({ active: "a", presets: { a: { agent: {} } } })).toThrow(
       /presets\.a: unknown key 'agent'/,
     );
   });
 
   it("rejects malformed model strings and unknown tiers inside presets", () => {
-    expect(() => validatePresets({ default: "a", presets: { a: { agents: { explore: "haiku" } } } })).toThrow(
+    expect(() => validatePresets({ active: "a", presets: { a: { agents: { explore: "haiku" } } } })).toThrow(
       /presets\.a\.agents\.explore 'haiku' is malformed/,
     );
-    expect(() => validatePresets({ default: "a", presets: { a: { default: "@x" } } })).toThrow(
+    expect(() => validatePresets({ active: "a", presets: { a: { default: "@x" } } })).toThrow(
       /presets\.a\.default references unknown tier '@x'/,
     );
-    expect(() => validatePresets({ default: "a", presets: { a: { tiers: { t: "@u" } } } })).toThrow(
+    expect(() => validatePresets({ active: "a", presets: { a: { tiers: { t: "@u" } } } })).toThrow(
       /must be a model string, not a tier reference/,
     );
-    expect(() => validatePresets({ default: "a", presets: { a: { agents: { explore: 3 } } } })).toThrow(
+    expect(() => validatePresets({ active: "a", presets: { a: { agents: { explore: 3 } } } })).toThrow(
       /must be a string/,
     );
   });
 
   it("rejects a variant on the global default model", () => {
-    expect(() => validatePresets({ default: "a", presets: { a: { model: "openai/gpt-6#high" } } })).toThrow(
+    expect(() => validatePresets({ active: "a", presets: { a: { model: "openai/gpt-6#high" } } })).toThrow(
       /presets\.a\.model .* must not carry a #variant/,
     );
   });
 
   it("rejects invalid preset names", () => {
-    expect(() => validatePresets({ default: "a b", presets: { "a b": {} } })).toThrow(/invalid preset name/);
+    expect(() => validatePresets({ active: "a b", presets: { "a b": {} } })).toThrow(/invalid preset name/);
   });
 });
 

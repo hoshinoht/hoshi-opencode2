@@ -103,7 +103,7 @@ Roles, built-in overrides and reasoning tiers: [docs/agents.md](docs/agents.md).
 | Package | What it does |
 | --- | --- |
 | `reasoning-router` | maps each agent to a reasoning-effort range per provider |
-| `model-presets` | switches every agent's model between named presets (`/preset`) from `model-presets.yaml` |
+| `model-presets` | switches every agent's model between named presets from `model-presets.yaml` (`active:` selects one, applied live on save) |
 | `openai-long-context` | adds `-1m` long-context variants of OpenAI models |
 | `usage-tracker` | Copilot and OpenAI/Codex quota view (`/usage`) |
 | `shiori` (`vendor/shiori`) | the 13 `workplan_*` tools for durable plans, checkpoints and recovery, served by a Go core |
@@ -179,7 +179,7 @@ opencode mcp list
 | Add API keys (`.env`, `.exa-api-key`) | [docs/install.md](docs/install.md) |
 | Change an agent's permissions | edit `scripts/agent-permissions.yaml`, then `bun scripts/gen-agent-permissions.ts` |
 | Change reasoning effort per agent | `providerAgentPolicy` in `opencode.json`; see [docs/agents.md](docs/agents.md) |
-| Switch model presets | `/preset <name>`; presets live in `model-presets.yaml`, see [docs/plugins.md](docs/plugins.md#model-presets) |
+| Switch model presets | set `active:` in `model-presets.yaml`; see [docs/plugins.md](docs/plugins.md#model-presets) |
 | Upgrade OpenCode | bump every `@opencode/plugin` pin to the new version, then `bun install` |
 
 ## Security

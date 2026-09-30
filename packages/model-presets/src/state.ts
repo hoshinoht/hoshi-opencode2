@@ -1,13 +1,12 @@
 /**
- * Runtime state: last good presets, the stored preset name, and the file
- * reload policy (keep the last good presets on error).
+ * Runtime state: last good presets and the file reload policy (keep the last
+ * good presets on error). The preset in effect is chosen by the file's
+ * top-level `active` key; there is no other selection state.
  */
 
 import { createApplyMemory, type ApplyMemory } from "./apply";
 import { loadPresetFile, type LoadResult } from "./file";
-import { PREFIX, type PresetOptions, type ResolvedPreset } from "./options";
-
-export const STORAGE_KEY = "active";
+import { formatModel, PREFIX, type PresetOptions, type ResolvedPreset } from "./options";
 
 export interface PresetState {
   readonly path: string;
@@ -15,11 +14,15 @@ export interface PresetState {
   options?: PresetOptions;
   /** Error from the most recent load, cleared on success. */
   lastError?: string;
-  /** Preset name from storage (may be stale after a file edit). */
-  stored?: string;
+  /** Last error that was logged; a repeat of it is not logged again until a load succeeds. */
+  loggedError?: string;
+  /** Fingerprint of the preset the agent transform last applied. */
+  appliedAgents?: string;
+  /** Global default model the model transform last applied ("" = none). */
+  appliedModel?: string;
   memory: ApplyMemory;
-  /** Warnings already logged, to avoid repeating them on every reload. */
-  warned: Set<string>;
+  /** Notes (deprecations) already logged, so each is logged once. */
+  noted: Set<string>;
   load: (path: string) => LoadResult;
   warn: (message: string) => void;
 }
@@ -31,39 +34,42 @@ export function createPresetState(
   return {
     path,
     memory: createApplyMemory(),
-    warned: new Set(),
+    noted: new Set(),
     load: deps.load ?? ((p) => loadPresetFile(p)),
     warn: deps.warn ?? ((m) => console.warn(m)),
   };
 }
 
-function warnOnce(state: PresetState, message: string): void {
-  if (state.warned.has(message)) return;
-  state.warned.add(message);
-  state.warn(message);
-}
+export type ReloadResult = { ok: true } | { ok: false; error: string };
 
-/** Re-read the preset file. On error, keep the last good presets and record the error. */
-export function reloadPresets(state: PresetState): void {
+/**
+ * Re-read the preset file. On error, keep the last good presets, record the
+ * error and log it (once per distinct error until the next good load).
+ */
+export function reloadPresets(state: PresetState): ReloadResult {
   const result = state.load(state.path);
   if (result.ok) {
     state.options = result.options;
     state.lastError = undefined;
-    return;
+    state.loggedError = undefined;
+    const note = result.options.note;
+    if (note && !state.noted.has(note)) {
+      state.noted.add(note);
+      state.warn(`[${PREFIX}] ${state.path}: ${note}`);
+    }
+    return { ok: true };
   }
   state.lastError = result.error + (state.options ? " (keeping the last good presets)" : "");
-  warnOnce(state, `[${PREFIX}] ${state.lastError}`);
+  if (state.loggedError !== state.lastError) {
+    state.loggedError = state.lastError;
+    state.warn(`[${PREFIX}] ${state.lastError}`);
+  }
+  return { ok: false, error: state.lastError };
 }
 
-/** Name of the preset in effect: the stored one if it still exists, else the file default. */
+/** Name of the preset in effect (the file's `active`), or undefined before the first good load. */
 export function activeName(state: PresetState): string | undefined {
-  const options = state.options;
-  if (!options) return undefined;
-  if (state.stored !== undefined) {
-    if (Object.hasOwn(options.presets, state.stored)) return state.stored;
-    warnOnce(state, `[${PREFIX}] stored preset '${state.stored}' no longer exists; using default '${options.default}'`);
-  }
-  return options.default;
+  return state.options?.active;
 }
 
 const NO_PRESET: ResolvedPreset = { name: "(none)", agents: {} };
@@ -74,19 +80,31 @@ export function activePreset(state: PresetState): ResolvedPreset {
   return (name && state.options?.presets[name]) || NO_PRESET;
 }
 
-export interface StorageLike {
-  get(key: string): Promise<unknown>;
+/** Stable identity of what the agent transform writes for `preset`. */
+export function agentFingerprint(preset: ResolvedPreset): string {
+  const agents = Object.keys(preset.agents)
+    .sort()
+    .map((id) => `${id}=${formatModel(preset.agents[id])}`);
+  return JSON.stringify([preset.name, preset.defaultModel ? formatModel(preset.defaultModel) : "", agents]);
 }
 
-/** Read the stored preset name; non-strings and storage failures count as unset. */
-export async function loadStoredName(storage: StorageLike, warn: (message: string) => void): Promise<string | undefined> {
-  try {
-    const stored = await storage.get(STORAGE_KEY);
-    if (stored === undefined || stored === null) return undefined;
-    if (typeof stored === "string") return stored;
-    warn(`[${PREFIX}] ignoring non-string stored preset ${JSON.stringify(stored)}`);
-  } catch (error) {
-    warn(`[${PREFIX}] storage read failed; using the file default: ${String(error)}`);
-  }
-  return undefined;
+/** Identity of the global default model `preset` sets ("" = leaves the config default). */
+export function modelFingerprint(preset: ResolvedPreset): string {
+  return preset.model ? formatModel(preset.model) : "";
+}
+
+export interface PendingReloads {
+  /** The active preset's agent models differ from what the agent transform last applied. */
+  agents: boolean;
+  /** The active preset's global default model differs from what was last applied. */
+  model: boolean;
+}
+
+/** What must be reloaded for the host to reflect the current active preset. */
+export function pendingReloads(state: PresetState): PendingReloads {
+  const preset = activePreset(state);
+  return {
+    agents: state.appliedAgents !== agentFingerprint(preset),
+    model: (state.appliedModel ?? "") !== modelFingerprint(preset),
+  };
 }

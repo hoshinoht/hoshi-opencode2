@@ -51,7 +51,7 @@ function makeHost(config = CONFIG) {
 }
 
 const OPTIONS = validatePresets({
-  default: "openai",
+  active: "openai",
   presets: {
     openai: {},
     anthropic: {
@@ -72,8 +72,7 @@ describe("applyPresetToAgents", () => {
     expect(result.changed).toEqual([]);
     expect(host.updates).toBe(0);
     expect(host.model("build")).toEqual(CONFIG.build);
-    expect(memory.effective.get("build")).toEqual({ model: CONFIG.build, overridden: false });
-    expect(memory.effective.get("bare")).toEqual({ model: undefined, overridden: false });
+    expect(host.model("bare")).toBeUndefined();
   });
 
   it("applies explicit agents, tiers and the preset default (built-in roles included)", () => {
@@ -144,7 +143,6 @@ describe("applyPresetToAgents", () => {
     applyPresetToAgents(host.editor, P.anthropic!, memory, (w) => warnings.push(w));
     expect(first.unknown).toEqual(["ghost"]);
     expect(warnings).toEqual(["[model-presets] preset 'anthropic' names unknown agent 'ghost'; skipped"]);
-    expect(memory.effective.has("ghost")).toBe(false);
   });
 
   it("does not warn (or remember) unknown agents when no warn callback is given", () => {

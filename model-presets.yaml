@@ -1,10 +1,15 @@
 # Model presets for the model-presets plugin (packages/model-presets).
 #
-#   /preset          list presets and the effective per-agent models
-#   /preset <name>   switch every agent to that preset
+# Switch presets by editing `active:` below and saving. The plugin watches this
+# file and applies a valid edit to every agent within about a second, with no
+# restart and no command. The file is also re-read on every agent reload.
+# A broken edit (bad YAML, unknown preset, malformed model) keeps the last good
+# presets and logs the error with its file:line in the opencode server log.
 #
-# Re-read on every /preset and agent reload; a broken edit keeps the last good
-# presets and /preset reports the error with its line.
+# Top level:
+#   active:  the preset in effect (the old top-level `default:` still works as
+#            a deprecated alias; `active` wins if both are present)
+#   presets: name -> preset
 #
 # Model strings: provider/model[#variant]. "@name" refers to the preset's tiers.
 # Per preset:
@@ -13,10 +18,14 @@
 #   model:   global default model (root "model" in opencode.json); no #variant
 #   agents:  explicit per-agent models; general, compaction, summary and title are agents too
 #
+# Sessions with an explicit per-session model keep it; everything else uses the
+# new agent models from its next turn.
+#
 # reasoning-router overrides the reasoning effort for openai and anthropic, so a
 # #variant here is authoritative only for providers the router does not manage.
 
-default: openai
+# Switch with: active: openai | anthropic | opencode
+active: openai
 
 presets:
   # Agent frontmatter and opencode.json models, unchanged.

@@ -7,7 +7,7 @@
  *
  * Preset file shape (YAML, comments allowed):
  *
- *   default: openai
+ *   active: openai            # the preset in effect (`default:` is a deprecated alias)
  *   presets:
  *     openai: {}
  *     anthropic:
@@ -42,8 +42,11 @@ export interface ResolvedPreset {
 }
 
 export interface PresetOptions {
-  readonly default: string;
+  /** Name of the preset in effect (top-level `active`, or the deprecated `default`). */
+  readonly active: string;
   readonly presets: Readonly<Record<string, ResolvedPreset>>;
+  /** Deprecation note about the top-level `default` alias, when it was present. */
+  readonly note?: string;
 }
 
 export interface PluginOptions {
@@ -65,7 +68,7 @@ export class PresetError extends Error {
 const NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const PROVIDER_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const VARIANT_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
-const TOP_KEYS = new Set(["default", "presets"]);
+const TOP_KEYS = new Set(["active", "default", "presets"]);
 const PRESET_KEYS = new Set(["tiers", "default", "agents", "model"]);
 const PLUGIN_KEYS = new Set(["file"]);
 
@@ -197,9 +200,9 @@ function resolvePreset(name: string, raw: unknown): ResolvedPreset {
 
 /** Validate the parsed preset file content. */
 export function validatePresets(raw: unknown): PresetOptions {
-  if (!isRecord(raw)) fail("preset file must be a mapping with 'default' and 'presets'");
+  if (!isRecord(raw)) fail("preset file must be a mapping with 'active' and 'presets'");
   for (const key of Object.keys(raw)) {
-    if (!TOP_KEYS.has(key)) fail(`unknown top-level key '${key}' (expected ${[...TOP_KEYS].join(", ")})`, [key]);
+    if (!TOP_KEYS.has(key)) fail(`unknown top-level key '${key}' (expected active, presets)`, [key]);
   }
   if (!isRecord(raw.presets)) fail("'presets' must be a mapping of preset name -> preset", ["presets"]);
   const names = Object.keys(raw.presets);
@@ -216,11 +219,22 @@ export function validatePresets(raw: unknown): PresetOptions {
     presets[name] = resolvePreset(name, raw.presets[name]);
   }
 
-  if (typeof raw.default !== "string") fail("'default' must name a preset", ["default"]);
-  if (!Object.hasOwn(presets, raw.default)) {
-    fail(`default '${raw.default}' is not a preset (known: ${names.join(", ")})`, ["default"]);
+  // `active` selects the preset; the top-level `default` is its deprecated
+  // alias and is ignored (not validated) when `active` is also present.
+  const hasActive = raw.active !== undefined && raw.active !== null;
+  const hasDefault = raw.default !== undefined && raw.default !== null;
+  const key = hasActive || !hasDefault ? "active" : "default";
+  const selected = raw[key];
+  if (typeof selected !== "string") fail(`'${key}' must name a preset (known: ${names.join(", ")})`, [key]);
+  if (!Object.hasOwn(presets, selected)) {
+    fail(`${key} '${selected}' is not a preset (known: ${names.join(", ")})`, [key]);
   }
-  return { default: raw.default, presets };
+  const note = !hasDefault
+    ? undefined
+    : hasActive
+      ? `both 'active' and the deprecated top-level 'default' are set; using active '${selected}' (remove 'default')`
+      : `top-level 'default' is deprecated; rename it to 'active'`;
+  return { active: selected, presets, ...(note ? { note } : {}) };
 }
 
 /** Validate the opencode.json plugin options. Fails fast. */
