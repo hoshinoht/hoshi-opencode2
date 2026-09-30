@@ -25,11 +25,34 @@
 # #variant here is authoritative only for providers the router does not manage.
 
 # Switch with: active: openai | anthropic | opencode
-active: anthropic
+active: openai
 
 presets:
-  # Agent frontmatter and opencode.json models, unchanged.
-  openai: {}
+  # Original OpenAI setup (as of 2026-09-30, before the session's tier changes).
+  # experimenter did not exist then; it keeps its frontmatter model.
+  openai:
+    model: openai/gpt-5.6-terra-1m
+    agents:
+      general: openai/gpt-5.6-terra-1m#high
+      compaction: openai/gpt-5.6-terra-1m#high
+      summary: openai/gpt-6-luna-1m#max
+      title: openai/gpt-6-luna-1m#max
+      build: openai/gpt-6.1-sol-1m#high
+      orchestrator: openai/gpt-6.1-sol-1m#high
+      plan: openai/gpt-6.1-sol-1m#high
+      plan-checker: openai/gpt-6.1-sol-1m#high
+      explore: openai/gpt-6-luna-1m#max
+      researcher: openai/gpt-5.6-terra-1m#medium
+      code-writer: openai/gpt-6-luna-1m#max
+      code-engineer: openai/gpt-6-luna-1m#max
+      frontend-engineer: openai/gpt-6-luna-1m#max
+      tester: openai/gpt-6-luna#low
+      code-checker: openai/gpt-5.6-terra-1m#medium
+      oracle: openai/gpt-6-astra#low
+      document-writer: openai/gpt-5.6-terra-1m#medium
+      document-proofreader: openai/gpt-5.6-terra-1m#medium
+      scholar: openai/gpt-5.6-terra-1m#high
+      ats-tailor: openai/gpt-5.6-terra-1m#high
 
   # Mirrors the commented `# model:` lines in agents/*.md and the commented
   # `// "model":` lines in opencode.json. experimenter has no commented model

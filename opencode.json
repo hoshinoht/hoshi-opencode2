@@ -104,13 +104,6 @@
           "anthropic": { "option": "effort", "efforts": ["low", "medium", "high"] }
         },
         "providerAgentPolicy": {
-          // Router efforts override agent `#variant`s; keep these in sync with agents/*.md.
-          "openai": {
-            "explore": { "def": "low", "min": "low", "max": "medium" },
-            "code-writer": { "def": "max", "min": "xhigh", "max": "max" },
-            "code-engineer": { "def": "high", "min": "medium", "max": "high" },
-            "frontend-engineer": { "def": "medium", "min": "medium", "max": "high" }
-          },
           "anthropic": {
             "explore": { "def": "low", "min": "low", "max": "medium" },
             "tester": { "def": "low", "min": "low", "max": "medium" },

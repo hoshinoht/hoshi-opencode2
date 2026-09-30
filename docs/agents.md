@@ -62,24 +62,24 @@ Evidence: the v2 docs linked above, and the bundled 2.0.20 source (`strings` on 
 
 ## Reasoning-router policy
 
-The `reasoning-router` plugin sets reasoning effort on child sessions. Its per-agent policy in `opencode.json` clamps whatever effort is requested, and it must be kept in step with the `#variant` on each agent's `model:` line.
+The `reasoning-router` plugin sets reasoning effort on child sessions, overriding the `#variant` in a model string for providers it routes (OpenAI and Anthropic here). OpenAI uses the router's built-in defaults; Anthropic uses the `providerAgentPolicy.anthropic` block in `opencode.json`.
 
-| Agent | OpenAI (def / min / max) | Anthropic (def / min / max) |
+| Agent | OpenAI, built-in (def / min / max) | Anthropic (def / min / max) |
 |---|---|---|
-| `explore` | low / low / medium | low / low / medium |
-| `code-writer` | max / xhigh / max | medium / low / medium |
-| `code-engineer` | high / medium / high | medium / medium / high |
+| `explore` | medium / low / high | low / low / medium |
+| `code-writer` | xhigh / xhigh / xhigh | medium / low / medium |
+| `code-engineer` | medium / medium / high | medium / medium / high |
 | `frontend-engineer` | medium / medium / high | medium / low / medium |
-| `tester` | - | low / low / medium |
-| `researcher` | - | medium / low / medium |
-| `document-writer` | - | medium / low / medium |
-| `document-proofreader` | - | low / low / medium |
-| `plan` | - | high / medium / high |
-| `plan-checker` | - | medium / medium / high |
-| `code-checker` | - | medium / low / high |
-| `oracle` | - | medium / medium / medium |
+| `tester` | low / low / medium | low / low / medium |
+| `researcher` | medium / low / medium | medium / low / medium |
+| `document-writer` | medium / low / medium | medium / low / medium |
+| `document-proofreader` | medium / low / medium | low / low / medium |
+| `plan` | high / medium / high | high / medium / high |
+| `plan-checker` | high / medium / high | medium / medium / high |
+| `code-checker` | medium / medium / high | medium / low / high |
+| `oracle` | low / low / low | medium / medium / medium |
 
-A dash means no OpenAI policy is set for that agent.
+Agents not listed (for example `build`, `orchestrator`, `scholar`) are not routed; their `#variant` applies as written.
 
 ## The built-in plan reminder
 
