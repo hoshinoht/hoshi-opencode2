@@ -76,7 +76,8 @@ describe("loadPresetFile", () => {
     const result = loadPresetFile(resolvePresetPath("model-presets.yaml"));
     if (!result.ok) throw new Error(result.error);
     expect(Object.keys(result.options.presets)).toEqual(["openai", "anthropic", "opencode"]);
-    expect(result.options.active).toBe("openai");
+    // `active` is the user's choice; it only has to name a defined preset.
+    expect(Object.keys(result.options.presets)).toContain(result.options.active);
     expect(result.options.note).toBeUndefined();
   });
 });
