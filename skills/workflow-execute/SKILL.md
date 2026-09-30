@@ -31,7 +31,7 @@ transactions via `workplan_update` with `recovery: "resume" | "rollback"`.
 Recovery is separate from normal updates. Stop on external-edit conflicts;
 never remove locks/journals or bypass a pending transaction with fallback edits.
 
-If the artifact contract cannot be read, report that blocker rather than guessing field names or accepting an unknown schema. Numeric `schemaVersion: 2` and the documented field types/statuses are required for the native-file fallback. Use the live session's canonical project root, not a filesystem alias that resolves outside it. For every native workplan edit, read the target artifact immediately before computing the patch and apply it without an intervening write. If a stale-state, anchor/context, or patch error occurs, discard the attempted patch, re-read the target, regenerate the smallest logical patch, and retry only that new patch; never retry unchanged or overwrite a concurrent update.
+If the artifact contract cannot be read, report that blocker rather than guessing field names or accepting an unknown schema. Numeric `schemaVersion: 2` and the documented field types/statuses are required for the native-file fallback. Use the live session's canonical project root, not a filesystem alias that resolves outside it. Native workplan edits follow the shared fresh-read rule in the global `AGENTS.md`, with no intervening write between the read and the patch.
 
 For this global harness, when `workplan_validate` is absent, orchestrator can run the read-only structural check with `bun ~/.config/opencode/scripts/check-workplan.ts <absolute-workspace-root> <workplan-id>` after the planner returns. It checks the existing schema and linked files without installing anything. A nonzero exit blocks structural validity. If Bun or this helper is unavailable, disclose that limitation and validate with native reads against the artifact contract; do not claim the command ran. Planner and reviewer agents have shell disabled and return their artifacts/findings to orchestrator for this check.
 
@@ -63,7 +63,7 @@ Single integrator still holds: only the parent (orchestrator) merges; workers ne
 
 # State updates
 
-Prefer one active workplan per task. Before targeted updates use `workplan_resume` or `workplan_inspect` scoped to the phase/step; reserve full `workplan_read` for historical detail, because long plans grow to hundreds of KB and a full read can cost 100k+ tokens. `workplan_update` owns JSON fields; `workplan_patch` owns localized Markdown prose. Omit unchanged optional fields and never send empty placeholder strings or full planMarkdown for routine updates. If tools are absent, edit the same version-2 JSON and Markdown directly; preserve ids, markers and unrelated state.
+Prefer one active workplan per task. Read state with the bounded `workplan_resume`/scoped `workplan_inspect` described in the global `AGENTS.md` before targeted updates. `workplan_update` owns JSON fields; `workplan_patch` owns localized Markdown prose. Omit unchanged optional fields and never send empty placeholder strings or full planMarkdown for routine updates. If tools are absent, edit the same version-2 JSON and Markdown directly; preserve ids, markers and unrelated state.
 
 Record review severities as `blocker`, `critical`, `major`, `minor`, `note`, `question`; map legacy Critical -> critical, High -> major, Medium -> minor, Low -> note. Mark resolved findings explicitly. Do not confuse structural `valid` with verified completion. Preserve failed attempt history and the current resume point across compaction.
 

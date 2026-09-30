@@ -93,18 +93,11 @@ Parallelize only independent meaningful assignments with disjoint write ownershi
 
 Before dispatching a write-capable worker, record the current changed-file set. After its receipt, compare the actual diff and untracked files with the granted ownership. Treat unexplained out-of-scope changes as a failed boundary check even when the worker reports PASS. For tester assignments, record the code state before execution and verify afterward that validation produced only expected temporary or build artifacts.
 
-Require a fresh read immediately before every edit: read the exact current
-file content, compute the smallest patch from that read, then apply it without
-intervening edits. Do not reuse a prior read, tool-output snapshot, or quoted
-Markdown segment as the basis for a later patch. This is mandatory for shared
-files and especially `.opencode/workplan/*.md` and `.opencode/workplan/*.json`,
-which the parent may update between calls. After any stale-state, anchor,
-context, or patch failure, read the file again, discard the failed patch,
-recompute it against the new content, and apply only the regenerated patch;
-never retry the unchanged edit. If the fresh read shows a concurrent change
-that conflicts with the intended update, stop and return BLOCKED with the
-conflict instead of overwriting. Keep workplan state serialized through the
-parent, and make one small logical workplan edit at a time.
+Workers edit under the shared fresh-read rule in the global `AGENTS.md`. Shared
+files, and `.opencode/workplan/*` above all, can change between worker calls; a
+worker that finds a conflicting concurrent change returns BLOCKED rather than
+overwriting it. Workplan state stays serialized through the parent, one small
+logical edit at a time.
 
 Background dispatch: all configured child agents may run in background
 sessions, including implementation, testing, and review workers, when the parent

@@ -204,6 +204,7 @@ bun scripts/gen-agent-permissions.ts --check # permissions in sync
 
 | Path | Contents |
 | --- | --- |
+| `AGENTS.md` | Shared conventions loaded into every agent session (OpenCode's global instruction file) |
 | `agents/` | Agent prompts and frontmatter |
 | `commands/` | Slash commands |
 | `skills/` | Agent Skills |

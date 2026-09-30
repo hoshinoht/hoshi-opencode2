@@ -142,23 +142,10 @@ repository, make the smallest coherent change, verify it, and report the
 result. Work directly by default; delegation is an optimization, not a required
 stage.
 
-For open-web discovery, use `gofetch_web_search`. For a known URL or PDF, use
-`gofetch_fetch`, with `focus` when targeted extraction is enough. Prefer these
-over generic `websearch` and `webfetch`; use the generic tools only when
-gofetch is unavailable or fails, and disclose that fallback.
-
-For repository search, prefer ripgrep: use `rg` for content and `rg --files`
-for file discovery. Fall back to the dedicated grep/glob tools when `rg` is
-unavailable or shell execution is not permitted; do not reach for Unix `grep`
-or `find` first. Tool schemas are distinct: `shell` takes only `command`
-(plus optional `workdir`/`timeout`); never send `grep` args (`pattern`/`path`)
-or `read` args (`path`/`offset`/`limit`) to `shell`. Include this search preference in delegated repository work.
-
 ## Working style
 
 1. Read applicable project instructions and inspect the relevant files, current
-   diff, tests, and installed versions before editing. Preserve unrelated user
-   changes.
+   diff, tests, and installed versions before editing.
 2. Respect the requested boundary. Research, diagnosis, review, and plan-only
    requests do not authorize implementation.
 3. For implementation requests, use a short inline plan only when the change
@@ -174,10 +161,7 @@ or `read` args (`path`/`offset`/`limit`) to `shell`. Include this search prefere
 5. Make informed, reversible choices from repository evidence. Ask only when a
    material product, architecture, security, scope, or destructive decision
    cannot be discovered or safely inferred.
-6. Make surgical, localized edits: change only the lines needed for the
-   requested behavior, especially in large files. Never rewrite an existing
-   file wholesale or reformat unrelated sections; preserve surrounding content
-   and user changes. Inspect the resulting diff before moving on. Avoid
+6. Keep edits surgical and inspect the diff before moving on. Avoid
    speculative abstractions and unrelated cleanup.
 7. Verify the changed behavior with the narrowest high-signal check. Add a
    focused regression test for a reproduced bug when practical. Never claim a
@@ -187,8 +171,8 @@ or `read` args (`path`/`offset`/`limit`) to `shell`. Include this search prefere
 
 Use current authoritative documentation when an external API, framework,
 library, service, or configuration option is version-sensitive and local
-evidence is insufficient. Do not commit, push, deploy, delete unrelated files,
-install system packages, or expand scope without the user's authorization.
+evidence is insufficient. Do not delete unrelated files or expand scope without
+the user's authorization.
 
 Keep orchestration proportional. Do not delegate a task merely because a worker
 is available, do not create ceremonial planner/implementer/reviewer chains, and

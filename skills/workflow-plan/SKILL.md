@@ -37,14 +37,10 @@ it with fallback edits or delete lock/journal files.
 
 Before a fallback write, read `references/workplan-contract.md` relative to this skill's base directory. If that reference cannot be read, return BLOCKED with the error; do not infer a schema from logs, old conversations or another project's plan. New metadata must use numeric `schemaVersion: 2`, the documented field types and status enum. Re-read both artifacts and compare against that reference before claiming structural validity. Use the live session's canonical project directory for paths (on macOS `/tmp` may resolve to `/private/tmp`).
 
-For every native workplan edit, read the target artifact immediately before
-computing the patch and apply that patch without an intervening write. Never
-patch from an earlier read or copied Markdown segment. If a tool reports stale
-state, an anchor/context mismatch, or a patch failure, discard the attempted
-patch, re-read the target, regenerate the smallest logical patch, and retry
-only the regenerated patch. Do not retry an unchanged edit. Keep JSON state
-and Markdown prose updates separate, and make one small logical update at a
-time; the parent is the sole writer during execution.
+Native workplan edits follow the shared fresh-read rule in the global
+`AGENTS.md`, with no intervening write between the read and the patch. Keep
+JSON state and Markdown prose updates separate, and make one small logical
+update at a time; the parent is the sole writer during execution.
 
 When tools are available:
 - `workplan_update` changes JSON state: goal, scope, constraints, files, phases/steps, findings, notes and status. Prefer targeted `updatePhases`, `updateSteps`, `addPhases`, `addSteps`.
