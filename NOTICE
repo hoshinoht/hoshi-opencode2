@@ -8,6 +8,8 @@ version. See LICENSE.
 
 Third-party components included in this repository keep their own licenses:
 
+- skills/ast-grep/                MIT, Copyright (c) 2026 Yeongyu Kim; vendored from
+                                  code-yeongyu/ast-grep-skill (see its LICENSE)
 - skills/shell-strategy/          MIT, Copyright (c) 2025 JRedeker (see its LICENSE)
 - skills/frontend-design/         MIT, author Lucas (declared in SKILL.md frontmatter)
 - mcps/lsp-tools-mcp/             MIT (see its LICENSE and NOTICE)
