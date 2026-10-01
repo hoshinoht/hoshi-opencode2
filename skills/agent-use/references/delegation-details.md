@@ -32,6 +32,8 @@ Run `subagent_list` to confirm a child's sessionID, agent and running state befo
 
 An idle child is not necessarily finished. If its last message says it is waiting on something (a background command, a run it started), treat the work as incomplete: resume it with its `sessionID` and tell it to run the check in the foreground.
 
+When choosing between resuming an idle child and dispatching a fresh one, `subagent_list` notes whether the child's prompt cache has probably expired and how much context a resume would re-write. Prefer resuming while the brief still fits, even when the cache is cold: re-writing the cache usually costs less than a fresh child re-reading the code and redoing the work. Dispatch fresh when the brief has changed substantially or the child's context is mostly stale exploration.
+
 ## Tester assignments
 
 Record the code state (commit plus a description of the working diff) before the run. Afterwards, check that validation produced only expected temporary or build output.

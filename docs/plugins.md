@@ -79,8 +79,16 @@ The pandoc-based document generator that provides the `docs_*` tools used by `do
 
 Adds two tools for a parent's own children:
 
-- `subagent_list({ running_only? })` lists the calling session's direct child sessions, running first then newest, with agent, title, running/idle state and the last turn's outcome. The plugin context's session API has no list call, so this one discovers the local OpenCode service (`Service.discover`) and calls `session.list({ parentID })` and `session.active()`; it refuses if that service does not hold the calling session.
+- `subagent_list({ running_only? })` lists the calling session's direct child sessions, running first then newest, with agent, title, running/idle state and the last turn's outcome. It reads each child's message history through the host (`session.context`, as `cache-guard` does): a running child shows what it is doing now (a tool such as `shell`, or a model response) and its last activity; an idle child shows when its last turn ended and whether its prompt cache has probably expired, with the context size a resume would re-write to the cache. The plugin context's session API has no list call, so this one discovers the local OpenCode service (`Service.discover`) and calls `session.list({ parentID })` and `session.active()`; it refuses if that service does not hold the calling session.
 - `subagent_stop({ sessionID, reason? })` reads the target session and refuses unless its `parentID` is the calling session, so an agent can only stop the children it started; then it calls the host's session interrupt, the same call as the TUI's "Interrupt subagent" command. The child's current turn is aborted but its session is kept, so `subagent` with the same `sessionID` continues it.
+
+Cache lifetimes are per provider, in minutes, and are timed from the start of the last model call:
+
+```jsonc
+{ "package": "./packages/subagent-control", "options": { "cacheTTLMinutes": { "anthropic": 5, "openai": 30 } } }
+```
+
+The defaults follow the providers' documentation: Anthropic caches for 5 minutes by default (1 hour is opt-in, and OpenCode's default Anthropic cache policy does not request it), measured from the start of the request; OpenAI GPT-5.6+ keeps a prefix for at least 30 minutes after its last write or reuse. Both refresh on every use. Providers not listed, such as GitHub Copilot, which documents no lifetime, get no cache note. A cold resume re-writes the whole context at the cache-write price (1.25x base input on both providers, against 0.1x or less for a cache read), which is usually still cheaper than a fresh child redoing the work.
 
 Only `build` and `orchestrator` are allowed these tools ([permissions.md](permissions.md)); the other ask-by-default agents deny them explicitly.
 

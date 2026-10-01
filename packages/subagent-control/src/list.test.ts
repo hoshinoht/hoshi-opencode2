@@ -66,3 +66,57 @@ describe("listSubagents", () => {
     await expect(listSubagents(port([], []), { all: true }, caller)).rejects.toThrow(/unknown field/);
   });
 });
+
+describe("listSubagents activity and cache lines", () => {
+  const MIN = 60_000;
+  const histories: Record<string, unknown[]> = {
+    ses_busy: [
+      {
+        type: "assistant",
+        model: { providerID: "anthropic" },
+        time: { created: NOW - 2 * MIN },
+        content: [{ type: "tool", name: "shell", state: { status: "running" }, time: { created: NOW - 2 * MIN, ran: NOW - 2 * MIN } }],
+      },
+    ],
+    ses_cold: [
+      { type: "assistant", model: { providerID: "anthropic" }, time: { created: NOW - 47 * MIN, completed: NOW - 46 * MIN }, tokens: { input: 2, cache: { read: 134_000, write: 400 } } },
+    ],
+    ses_warm: [{ type: "assistant", model: { providerID: "openai" }, time: { created: NOW - 10 * MIN, completed: NOW - 9 * MIN }, tokens: { input: 50_000 } }],
+  };
+  const withContext = (base: ListPort): ListPort => ({
+    ...base,
+    async context(sessionID) {
+      const history = histories[sessionID];
+      if (!history) throw new Error("unreadable");
+      return history;
+    },
+  });
+  const children = [
+    child("ses_busy", "ses_parent", "frontend-engineer", 900),
+    child("ses_cold", "ses_parent", "code-writer", 3000, { outcome: "succeeded", time: { created: NOW - 50 * MIN, updated: 0, idle: NOW - 46 * MIN } }),
+    child("ses_warm", "ses_parent", "explore", 1200, { outcome: "succeeded" }),
+    child("ses_gone", "ses_parent", "tester", 600, { outcome: "failed" }),
+  ];
+  const options = { cacheTTLMinutes: { anthropic: 5, openai: 30 } };
+
+  test("running child shows current work and last activity; idle ones show cache state", async () => {
+    const out = await listSubagents(withContext(port(children, ["ses_busy"])), {}, caller, options);
+    expect(out).toContain("- ses_busy | frontend-engineer | running shell for 2m, last activity 2m ago | created 15m ago");
+    expect(out).toContain(
+      "  cache: likely cold, last model call 47m ago (anthropic, 5m lifetime); resuming re-writes ~134k context tokens at the cache-write price",
+    );
+    expect(out).toContain("  cache: likely warm for ~20m more (openai, 30m lifetime)");
+    expect(out).toContain("- ses_gone | tester | idle, last turn failed");
+    expect(out).toContain("  activity unavailable: its message history could not be read");
+    // Running children refresh their own cache, so they get no cache line.
+    const busyBlock = out.split("\n- ")[1]!;
+    expect(busyBlock).not.toContain("cache:");
+  });
+
+  test("without a context reader the extra lines are omitted", async () => {
+    const out = await listSubagents(port(children, ["ses_busy"]), {}, caller, options);
+    expect(out).toContain("- ses_busy | frontend-engineer | running | created 15m ago");
+    expect(out).not.toContain("cache:");
+    expect(out).not.toContain("activity unavailable");
+  });
+});
