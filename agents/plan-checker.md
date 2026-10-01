@@ -3,8 +3,8 @@ description: Plan verification specialist. Reviews workplans, specs, handoffs,
   and workflow risks before implementation.
 mode: subagent
 color: "#FB7185"
-model: openai/gpt-6.1-sol-1m#high
-# model: anthropic/claude-opus-5-5#medium
+# model: openai/gpt-6.1-sol-1m#high
+model: anthropic/claude-opus-5-5#medium
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
 permissions:
   - action: "*"

@@ -5,8 +5,8 @@ description: ATS resume-application specialist. Uses the ats-tailor MCP to
 mode: primary
 hidden: true
 color: "#10B981"
-model: openai/gpt-5.6-terra-1m#high
-# model: anthropic/claude-opus-5-5#medium
+# model: openai/gpt-5.6-terra-1m#high
+model: anthropic/claude-opus-5-5#medium
 permissions:
   - action: "*"
     resource: "*"

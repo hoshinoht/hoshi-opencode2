@@ -5,8 +5,8 @@ description: |
   stated rationale; escalates consequential decisions to the parent.
 mode: subagent
 color: "#F59E0B"
-model: openai/gpt-5.6-terra-1m#high
-# model: anthropic/claude-opus-5-5#medium
+# model: openai/gpt-5.6-terra-1m#high
+model: anthropic/claude-opus-5-5#medium
 permissions:
   - action: "*"
     resource: "*"

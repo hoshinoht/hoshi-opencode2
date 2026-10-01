@@ -3,8 +3,8 @@ description: Software-engineering planner. Returns a concise executable approach
   by default and creates durable workplans only when coordination warrants it.
 mode: all
 color: "#FBBF24"
-model: openai/gpt-6.1-sol-1m#high
-# model: anthropic/claude-opus-5-5#high
+# model: openai/gpt-6.1-sol-1m#high
+model: anthropic/claude-opus-5-5#high
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
 permissions:
   - action: "*"

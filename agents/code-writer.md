@@ -4,8 +4,8 @@ description: |
   Carries out a single plan step or review-fix pass per delegation.
 mode: subagent
 color: "#34D399"
-model: openai/gpt-6-luna-1m#max
-# model: anthropic/claude-opus-5-5#low
+# model: openai/gpt-6-luna-1m#max
+model: anthropic/claude-opus-5-5#low
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
 permissions:
   - action: "*"

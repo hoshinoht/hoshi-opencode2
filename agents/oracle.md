@@ -4,8 +4,8 @@ description: Exceptional read-only architecture or debugging advisor. Use after
   approaches.
 mode: subagent
 color: "#818CF8"
-model: openai/gpt-6-astra#low
-# model: anthropic/claude-fable-5-1#medium
+# model: openai/gpt-6-astra#low
+model: anthropic/claude-fable-5-1#medium
 # fallback-model: opencode/muse-spark-1.3-contributor-free#xhigh
 permissions:
   - action: "*"

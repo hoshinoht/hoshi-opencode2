@@ -4,8 +4,8 @@ description: Academic research and LaTeX authoring agent. Finds and verifies
   and proofreads for evidence, argument, and style.
 mode: primary
 color: "#A78BFA"
-model: openai/gpt-5.6-terra-1m#high
-# model: anthropic/claude-opus-5-5#medium
+# model: openai/gpt-5.6-terra-1m#high
+model: anthropic/claude-opus-5-5#medium
 permissions:
   - action: "*"
     resource: "*"

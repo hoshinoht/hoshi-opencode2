@@ -3,8 +3,8 @@ description: "Code verification specialist. Three-pillar analysis: smells, spec
   alignment, correctness."
 mode: subagent
 color: "#F87171"
-model: openai/gpt-5.6-terra-1m#medium
-# model: anthropic/claude-opus-5-5#medium
+# model: openai/gpt-5.6-terra-1m#medium
+model: anthropic/claude-opus-5-5#medium
 permissions:
   - action: "*"
     resource: "*"

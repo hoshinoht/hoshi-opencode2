@@ -4,8 +4,8 @@ description: |
   Produces papers, reports and styled PDFs through the pandoc-based docs toolchain.
 mode: subagent
 color: "#E879F9"
-model: openai/gpt-5.6-terra-1m#medium
-# model: anthropic/claude-opus-5-5#medium
+# model: openai/gpt-5.6-terra-1m#medium
+model: anthropic/claude-opus-5-5#medium
 # fallback-model: opencode/muse-spark-1.3-contributor-free#medium
 permissions:
   - action: "*"

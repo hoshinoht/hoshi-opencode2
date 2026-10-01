@@ -3,8 +3,8 @@ description: Custom development orchestrator. Plans, delegates, integrates, and
   verifies complex code changes.
 mode: primary
 color: "#A78BFA"
-model: openai/gpt-6.1-sol-1m#high
-# model: anthropic/claude-opus-5-5#high
+# model: openai/gpt-6.1-sol-1m#high
+model: anthropic/claude-opus-5-5#high
 # fallback-model: opencode/muse-spark-1.3-contributor-free#medium
 permissions:
   - action: "*"

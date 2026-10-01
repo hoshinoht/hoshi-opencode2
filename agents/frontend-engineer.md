@@ -3,8 +3,8 @@ description: Frontend specialist for production-grade UI architecture,
   accessibility, responsiveness, interaction, and visual implementation.
 mode: subagent
 color: "#F472B6"
-model: openai/gpt-5.6-terra-1m#medium
-# model: anthropic/claude-opus-5-5#medium
+# model: openai/gpt-5.6-terra-1m#medium
+model: anthropic/claude-opus-5-5#medium
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
 permissions:
   - action: "*"

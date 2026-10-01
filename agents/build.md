@@ -2,8 +2,8 @@
 description: Lightweight development orchestrator for everyday fixes and focused changes.
 mode: primary
 color: "#4F8CC9"
-model: openai/gpt-6.1-sol-1m#high
-# model: anthropic/claude-opus-5-5#medium
+# model: openai/gpt-6.1-sol-1m#high
+model: anthropic/claude-opus-5-5#medium
 permissions:
   - action: "*"
     resource: "*"

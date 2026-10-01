@@ -4,8 +4,8 @@ description: |
   an evidence-grounded review; may inspect the codebase read-only for context.
 mode: subagent
 color: "#2DD4BF"
-model: openai/gpt-5.6-terra-1m#medium
-# model: anthropic/claude-opus-5-5#medium
+# model: openai/gpt-5.6-terra-1m#medium
+model: anthropic/claude-opus-5-5#medium
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
 permissions:
   - action: "*"
