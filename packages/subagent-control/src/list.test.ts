@@ -30,7 +30,7 @@ describe("listSubagents", () => {
       port(
         [
           child("ses_old", "ses_parent", "explore", 600, { outcome: "succeeded" }),
-          child("ses_new", "ses_parent", "tester", 30, { outcome: "failed" }),
+          child("ses_new", "ses_parent", "tester", 30, { outcome: "failed", time: { created: NOW - 30_000, updated: NOW - 30_000, idle: NOW - 10_000 } }),
           child("ses_busy", "ses_parent", "code-writer", 900),
         ],
         ["ses_busy"],
@@ -40,8 +40,9 @@ describe("listSubagents", () => {
     );
     const lines = out.split("\n");
     expect(lines[0]).toBe("3 subagent(s) of this session, 1 running:");
-    expect(lines[1]).toContain("- ses_busy | code-writer | running | started 15m ago");
-    expect(lines[3]).toContain("- ses_new | tester | idle, last turn failed");
+    expect(lines[1]).toBe("- ses_busy | code-writer | running | created 15m ago");
+    expect(lines[3]).toBe("- ses_new | tester | idle, last turn failed and ended 10s ago | created 30s ago");
+    expect(out).not.toContain("updated");
     expect(lines[5]).toContain("- ses_old | explore | idle, last turn succeeded");
     expect(lines[2]).toBe("  code-writer task");
   });

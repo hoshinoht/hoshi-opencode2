@@ -1,7 +1,8 @@
 export const LIST_TOOL = "subagent_list";
 
 export const LIST_DESCRIPTION = [
-  "Lists the subagents (direct child sessions) this session started, newest first, with each one's sessionID, agent, title, whether it is running now and how its last turn ended.",
+  "Lists the subagents (direct child sessions) this session started, running first then newest, with each one's sessionID, agent, title, whether it is running now, and for idle ones how and when the last turn ended.",
+  "There is no last-activity time: a running child shows only when it was created. An idle child whose work is unfinished (for example one that ended its turn waiting on a background command) will not wake on its own; resume it with the subagent tool.",
   "Check it before subagent_stop so you stop the right child. It reports state only; it is not a reason to poll background children.",
 ].join("\n");
 
@@ -20,7 +21,8 @@ export interface ChildInfo {
   agent?: string;
   title?: string;
   outcome?: "succeeded" | "failed" | "interrupted";
-  time: { created: number; updated: number; archived?: number };
+  /** `idle` is when the last turn ended; `updated` tracks metadata edits only, not activity. */
+  time: { created: number; updated: number; idle?: number; archived?: number };
 }
 
 /** Read access to the session store, from the discovered local service. */
@@ -77,13 +79,11 @@ export async function listSubagents(port: ListPort, rawInput: unknown, caller: L
   const running = own.filter((entry) => entry.running).length;
   const lines = [`${own.length} subagent(s) of this session, ${running} running:`];
   for (const { child, running: isRunning } of own) {
-    const state = isRunning ? "running" : `idle, last turn ${child.outcome ?? "unknown"}`;
-    const parts = [
-      `- ${child.id}`,
-      child.agent ?? "unknown agent",
-      state,
-      `started ${age(child.time.created, now)} ago, updated ${age(child.time.updated, now)} ago`,
-    ];
+    // Sessions expose no last-activity time, so a running child only reports when it was started.
+    const state = isRunning
+      ? "running"
+      : `idle, last turn ${child.outcome ?? "unknown"}${child.time.idle ? ` and ended ${age(child.time.idle, now)} ago` : ""}`;
+    const parts = [`- ${child.id}`, child.agent ?? "unknown agent", state, `created ${age(child.time.created, now)} ago`];
     if (child.time.archived) parts.push("archived");
     lines.push(`${parts.join(" | ")}${child.title ? `\n  ${child.title}` : ""}`);
   }

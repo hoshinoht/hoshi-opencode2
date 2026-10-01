@@ -30,6 +30,8 @@ Any configured child may run in the background once it has a complete brief and 
 
 Run `subagent_list` to confirm a child's sessionID, agent and running state before stopping it. Stop a child with `subagent_stop` only when its brief is superseded, it has drifted outside its scope, or the user asks; never to check on progress. A stopped child returns no receipt: record the stop and its reason, treat any edits it made as unreviewed partial work, and either resume it with its `sessionID` or re-dispatch with a fresh brief.
 
+An idle child is not necessarily finished. If its last message says it is waiting on something (a background command, a run it started), treat the work as incomplete: resume it with its `sessionID` and tell it to run the check in the foreground.
+
 ## Tester assignments
 
 Record the code state (commit plus a description of the working diff) before the run. Afterwards, check that validation produced only expected temporary or build output.

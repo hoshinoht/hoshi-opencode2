@@ -42,7 +42,7 @@ describe("stopSubagent", () => {
 
   test("refuses a session that is not the caller's child", async () => {
     const { port, interrupted } = fakeSession(sessions, new Set(["ses_other"]));
-    await expect(stopSubagent(port, { sessionID: "ses_other" }, { sessionID: "ses_parent" })).rejects.toThrow(/not a child/);
+    await expect(stopSubagent(port, { sessionID: "ses_other" }, { sessionID: "ses_parent" })).rejects.toThrow(/not a subagent of this session/);
     expect(interrupted).toEqual([]);
   });
 
@@ -52,9 +52,24 @@ describe("stopSubagent", () => {
     expect(interrupted).toEqual([]);
   });
 
-  test("surfaces an unreadable session", async () => {
+  test("explains an unknown session ID from a tagged host error with no message", async () => {
     const { port } = fakeSession(sessions, new Set());
-    await expect(stopSubagent(port, { sessionID: "ses_missing" }, { sessionID: "ses_parent" })).rejects.toThrow(/could not be read/);
+    port.get = async () => {
+      throw Object.assign(new Error(""), { _tag: "SessionNotFoundError" });
+    };
+    await expect(stopSubagent(port, { sessionID: "ses_missing" }, { sessionID: "ses_parent" })).rejects.toThrow(
+      "no session ses_missing exists, so it is not a subagent of this session",
+    );
+  });
+
+  test("names other read failures instead of printing empty brackets", async () => {
+    const { port } = fakeSession(sessions, new Set());
+    port.get = async () => {
+      throw { _tag: "ServiceUnavailable" };
+    };
+    await expect(stopSubagent(port, { sessionID: "ses_child" }, { sessionID: "ses_parent" })).rejects.toThrow(
+      "could not be read: ServiceUnavailable.",
+    );
   });
 
   test("rejects malformed input", async () => {

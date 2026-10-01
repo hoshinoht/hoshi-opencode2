@@ -48,3 +48,4 @@ A workplan's full history can be larger than your context window. Start from `wo
 - Lead the final report with the outcome, then the evidence that makes it trustworthy: what was verified and how, what was not and why, and pre-existing problems you noticed but left alone. A short report still keeps those three things; cut restated context instead.
 - Give progress updates only at phase changes, blockers, or findings that change the plan, not per tool call.
 - Delegated agents end their final report with a `STATUS:` line followed by the evidence; the `agent-use` skill defines the fields.
+- A delegated agent never ends its turn while a background command it started is still running. Background results do not wake a child session, so the job is orphaned and the parent sees an idle child with unfinished work. Run checks in the foreground, or wait for the background job and read its result before reporting.

@@ -27,7 +27,7 @@
 | --- | --- |
 | **Entry points** | `build` (default) for everyday work · `/dev` for orchestrated features · `scholar` for papers |
 | **Agents** | 17: 4 primary, 1 dual-mode (`plan`), 12 subagents, each with generated least-privilege permissions |
-| **Plugins** | reasoning-router · openai-long-context · usage-tracker · shiori (workplan) · cache-guard · docs |
+| **Plugins** | reasoning-router · openai-long-context · usage-tracker · shiori (workplan) · cache-guard · docs · subagent-control |
 | **MCP servers** | [gofetch](https://github.com/hoshinoht/gofetch-mcp) · [researcher-mcp](https://github.com/hoshinoht/researcher-mcp) · context7 · deepwiki · grep_app · lsp-tools · [ats-tailor](https://github.com/hoshinoht/ats-tailor) (disabled by default) |
 | **Skills** | 17 [Agent Skills](https://agentskills.io), most of them platform-agnostic |
 
@@ -107,13 +107,13 @@ Roles, built-in overrides and reasoning tiers: [docs/agents.md](docs/agents.md).
 | Package | What it does |
 | --- | --- |
 | `reasoning-router` | maps each agent to a reasoning-effort range per provider |
-
 | `openai-long-context` | adds `-1m` long-context variants of OpenAI models |
 | `usage-tracker` | Copilot and OpenAI/Codex quota view (`/usage`) |
 | `shiori` (`vendor/shiori`) | the 13 `workplan_*` tools for durable plans, checkpoints and recovery, served by a Go core |
 | `workplan-tools` | previous TypeScript engine; kept for rollback, not registered |
 | `cache-guard` | advisory warning before an idle prompt cache expires |
 | `docs` | pandoc reports, school reports and styled PDFs (`docs_*` tools) |
+| `subagent-control` | `subagent_list` and `subagent_stop`, so `build` and `orchestrator` can see and interrupt their own subagents |
 | `quota-fallback` | model failover on quota errors; present, not registered |
 
 Details: [docs/plugins.md](docs/plugins.md).

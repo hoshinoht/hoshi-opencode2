@@ -52,6 +52,21 @@ function parseInput(value: unknown): { sessionID: string; reason?: string } {
   return { sessionID: sessionID.trim(), ...(reason ? { reason } : {}) };
 }
 
+function errorTag(error: unknown): string | undefined {
+  const tag = (error as { _tag?: unknown } | null)?._tag;
+  return typeof tag === "string" ? tag : undefined;
+}
+
+// Host errors are tagged objects whose message can be empty, so check the tag first.
+function isNotFound(error: unknown): boolean {
+  return errorTag(error) === "SessionNotFoundError" || (error instanceof Error && /session not found/i.test(error.message));
+}
+
+function describe(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  return errorTag(error) ?? (String(error) || "unknown error");
+}
+
 export async function stopSubagent(session: SessionPort, rawInput: unknown, caller: StopCaller): Promise<string> {
   const { sessionID, reason } = parseInput(rawInput);
   const options = caller.signal ? { signal: caller.signal } : {};
@@ -61,11 +76,14 @@ export async function stopSubagent(session: SessionPort, rawInput: unknown, call
   try {
     child = await session.get({ sessionID }, options);
   } catch (error) {
-    throw new Error(`${STOP_TOOL}: session ${sessionID} could not be read (${error instanceof Error ? error.message : String(error)}).`);
+    if (isNotFound(error)) {
+      throw new Error(`${STOP_TOOL}: no session ${sessionID} exists, so it is not a subagent of this session. Run subagent_list for your subagents' IDs.`);
+    }
+    throw new Error(`${STOP_TOOL}: session ${sessionID} could not be read: ${describe(error)}.`);
   }
   // Ownership: a parent may only stop the children it started.
   if (child.parentID !== caller.sessionID) {
-    throw new Error(`${STOP_TOOL}: session ${sessionID} is not a child of this session; only your own subagents can be stopped.`);
+    throw new Error(`${STOP_TOOL}: session ${sessionID} is not a subagent of this session; only your own subagents can be stopped. Run subagent_list for their IDs.`);
   }
 
   const { interrupted } = await session.interrupt({ sessionID }, options);
