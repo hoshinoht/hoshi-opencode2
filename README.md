@@ -27,7 +27,7 @@
 | --- | --- |
 | **Entry points** | `build` (default) for everyday work · `/dev` for orchestrated features · `scholar` for papers |
 | **Agents** | 17: 4 primary, 1 dual-mode (`plan`), 12 subagents, each with generated least-privilege permissions |
-| **Plugins** | reasoning-router · model-presets · openai-long-context · usage-tracker · shiori (workplan) · cache-guard · docs |
+| **Plugins** | reasoning-router · openai-long-context · usage-tracker · shiori (workplan) · cache-guard · docs |
 | **MCP servers** | [gofetch](https://github.com/hoshinoht/gofetch-mcp) · [researcher-mcp](https://github.com/hoshinoht/researcher-mcp) · context7 · deepwiki · grep_app · lsp-tools · [ats-tailor](https://github.com/hoshinoht/ats-tailor) (disabled by default) |
 | **Skills** | 17 [Agent Skills](https://agentskills.io), most of them platform-agnostic |
 
@@ -107,7 +107,7 @@ Roles, built-in overrides and reasoning tiers: [docs/agents.md](docs/agents.md).
 | Package | What it does |
 | --- | --- |
 | `reasoning-router` | maps each agent to a reasoning-effort range per provider |
-| `model-presets` | switches every agent's model between named presets from `model-presets.yaml` (`active:` selects one, applied live on save) |
+
 | `openai-long-context` | adds `-1m` long-context variants of OpenAI models |
 | `usage-tracker` | Copilot and OpenAI/Codex quota view (`/usage`) |
 | `shiori` (`vendor/shiori`) | the 13 `workplan_*` tools for durable plans, checkpoints and recovery, served by a Go core |
@@ -183,8 +183,7 @@ opencode api GET /api/plugin
 | Add API keys (`.env`, `.exa-api-key`) | [docs/install.md](docs/install.md) |
 | Change an agent's permissions | edit `scripts/agent-permissions.yaml`, then `bun scripts/gen-agent-permissions.ts` |
 | Change reasoning effort per agent | `providerAgentPolicy` in `opencode.json`; see [docs/agents.md](docs/agents.md) |
-| Switch model presets | set `active:` in `model-presets.yaml`; see [docs/plugins.md](docs/plugins.md#model-presets) |
-| See why a preset did not switch | `tail -f ~/.local/state/opencode/model-presets.log`; see [docs/plugins.md](docs/plugins.md#model-presets-log) |
+
 | Upgrade OpenCode | bump every `@opencode/plugin` pin to the new version, then `bun install` |
 
 ## Security

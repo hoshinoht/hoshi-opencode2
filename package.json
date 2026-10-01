@@ -8,7 +8,7 @@
   "workspaces": [
     "packages/cache-guard",
     "packages/docs",
-    "packages/model-presets",
+
     "packages/openai-long-context",
     "packages/quota-fallback",
     "packages/reasoning-router",
