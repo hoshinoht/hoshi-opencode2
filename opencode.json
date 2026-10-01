@@ -142,6 +142,10 @@
       "package": "./packages/docs"
     },
     {
+      // subagent_stop: lets build/orchestrator interrupt their own child sessions.
+      "package": "./packages/subagent-control"
+    },
+    {
       "package": "./packages/cache-guard",
       "options": {
         "mode": "advisory",

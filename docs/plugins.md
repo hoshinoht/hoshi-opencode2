@@ -14,6 +14,7 @@ Local plugins live in `packages/`. Each is an `@hoshi-opencode2/*` package built
 | `cache-guard` | yes | advisory warning when an OpenAI prompt cache is likely going cold |
 | `quota-fallback` | no | model failover on quota or rate-limit errors |
 | `docs` | yes | pandoc document generation behind the `docs_*` tools |
+| `subagent-control` | yes | `subagent_list` and `subagent_stop`, which let a parent see and interrupt its own child sessions |
 
 `opencode.json` also registers one third-party plugin, `@ex-machina/opencode-anthropic-auth@next`, and disables the built-in plan reminder with `"-opencode.plan"` (see [agents.md](agents.md#the-built-in-plan-reminder)).
 
@@ -73,6 +74,15 @@ The pandoc-based document generator that provides the `docs_*` tools used by `do
 - Venue papers are **not** a docs-plugin job: `scholar` writes them in native LaTeX with the official class (`IEEEtran`, `acmart`, ...).
 - Citation handling is chosen with `citation_style`.
 - Templates and logos ship inside the package: `packages/docs/pandoc/templates/{sit-uofg,eisvogel}` and `packages/docs/pandoc/assets/`. `~/.config/opencode/pandoc/` is an optional user override.
+
+## subagent-control
+
+Adds two tools for a parent's own children:
+
+- `subagent_list({ running_only? })` lists the calling session's direct child sessions, running first then newest, with agent, title, running/idle state and the last turn's outcome. The plugin context's session API has no list call, so this one discovers the local OpenCode service (`Service.discover`) and calls `session.list({ parentID })` and `session.active()`; it refuses if that service does not hold the calling session.
+- `subagent_stop({ sessionID, reason? })` reads the target session and refuses unless its `parentID` is the calling session, so an agent can only stop the children it started; then it calls the host's session interrupt, the same call as the TUI's "Interrupt subagent" command. The child's current turn is aborted but its session is kept, so `subagent` with the same `sessionID` continues it.
+
+Only `build` and `orchestrator` are allowed these tools ([permissions.md](permissions.md)); the other ask-by-default agents deny them explicitly.
 
 ## Related projects
 

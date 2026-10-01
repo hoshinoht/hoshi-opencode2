@@ -80,6 +80,8 @@ agents:
     - [subagent, document-writer, allow]
     - [subagent, document-proofreader, allow]
     - [subagent, experimenter, allow]
+    - [subagent_list, "*", allow]
+    - [subagent_stop, "*", allow]  # the tool itself refuses sessions that are not the caller's children
     - "@workplan-write-deny"
     - "@external-dirs"
     - "@env-guard"
@@ -101,6 +103,8 @@ agents:
     - "@env-guard"
   code-engineer:
     - ["*", "*", ask]
+    - [subagent_list, "*", deny]
+    - [subagent_stop, "*", deny]
     - "@core-read"
     - [question, "*", deny]
     - "@web"
@@ -113,6 +117,8 @@ agents:
     - "@env-guard"
   code-writer:
     - ["*", "*", ask]
+    - [subagent_list, "*", deny]
+    - [subagent_stop, "*", deny]
     - "@core-read"
     - [question, "*", deny]
     - "@web"
@@ -133,6 +139,8 @@ agents:
     - "@env-guard"
   document-writer:
     - ["*", "*", ask]
+    - [subagent_list, "*", deny]
+    - [subagent_stop, "*", deny]
     - "@core-read"
     - [question, "*", deny]
     - "@web"
@@ -169,6 +177,8 @@ agents:
     - [grep_app_*, "*", allow]
   frontend-engineer:
     - ["*", "*", ask]
+    - [subagent_list, "*", deny]
+    - [subagent_stop, "*", deny]
     - "@core-read"
     - [question, "*", deny]
     - "@web"
@@ -223,6 +233,8 @@ agents:
     - [subagent, document-writer, allow]
     - [subagent, document-proofreader, allow]
     - [subagent, experimenter, allow]
+    - [subagent_list, "*", allow]
+    - [subagent_stop, "*", allow]  # the tool itself refuses sessions that are not the caller's children
     - "@external-dirs"
     - "@env-guard"
   plan-checker:
@@ -282,6 +294,8 @@ agents:
     - "@env-guard"
   scholar:
     - ["*", "*", ask]
+    - [subagent_list, "*", deny]
+    - [subagent_stop, "*", deny]
     - "@core-read"
     - [question, "*", allow]
     - [webfetch, "*", allow]

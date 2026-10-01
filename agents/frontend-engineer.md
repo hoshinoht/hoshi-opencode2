@@ -10,6 +10,12 @@ permissions:
   - action: "*"
     resource: "*"
     effect: ask
+  - action: subagent_list
+    resource: "*"
+    effect: deny
+  - action: subagent_stop
+    resource: "*"
+    effect: deny
   - action: read
     resource: "*"
     effect: allow

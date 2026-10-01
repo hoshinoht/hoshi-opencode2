@@ -85,4 +85,4 @@ Decision required: exact conflict or missing input, or none
 - Route by what the evidence now shows: interacting control flow or open implementation choices go to `code-engineer`; conflicting requirements or unclear ownership go back to you or `plan`; contradictory evidence after failed approaches goes to `oracle`. Once the question is settled, route the next specified work back to the cheapest capable agent.
 - After two failed fixes for the same issue, change the approach instead of retrying it. After three implementation, validation and review cycles on one scope without convergence, stop and report the blocker and the decision needed.
 
-For durable-workplan dispatch (step claims), worktree lanes, tester code-state checks and router details, read [references/delegation-details.md](references/delegation-details.md).
+For durable-workplan dispatch (step claims), worktree lanes, listing or stopping children (`subagent_list`, `subagent_stop`), tester code-state checks and router details, read [references/delegation-details.md](references/delegation-details.md).

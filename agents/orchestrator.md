@@ -145,6 +145,12 @@ permissions:
   - action: subagent
     resource: experimenter
     effect: allow
+  - action: subagent_list
+    resource: "*"
+    effect: allow
+  - action: subagent_stop
+    resource: "*"
+    effect: allow
   - action: external_directory
     resource: "*"
     effect: ask

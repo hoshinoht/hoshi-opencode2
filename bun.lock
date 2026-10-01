@@ -27,7 +27,6 @@
         "yaml": "^2.8.0",
       },
     },
-
     "packages/openai-long-context": {
       "name": "@hoshi-opencode2/openai-long-context",
       "version": "1.1.0",
@@ -46,6 +45,14 @@
       "name": "@hoshi-opencode2/reasoning-router",
       "version": "1.0.0",
       "dependencies": {
+        "@opencode/plugin": "2.0.20",
+      },
+    },
+    "packages/subagent-control": {
+      "name": "@hoshi-opencode2/subagent-control",
+      "version": "1.0.0",
+      "dependencies": {
+        "@opencode/client": "2.0.20",
         "@opencode/plugin": "2.0.20",
       },
     },
@@ -192,12 +199,13 @@
 
     "@hoshi-opencode2/docs": ["@hoshi-opencode2/docs@workspace:packages/docs"],
 
-
     "@hoshi-opencode2/openai-long-context": ["@hoshi-opencode2/openai-long-context@workspace:packages/openai-long-context"],
 
     "@hoshi-opencode2/quota-fallback": ["@hoshi-opencode2/quota-fallback@workspace:packages/quota-fallback"],
 
     "@hoshi-opencode2/reasoning-router": ["@hoshi-opencode2/reasoning-router@workspace:packages/reasoning-router"],
+
+    "@hoshi-opencode2/subagent-control": ["@hoshi-opencode2/subagent-control@workspace:packages/subagent-control"],
 
     "@hoshi-opencode2/usage-tracker": ["@hoshi-opencode2/usage-tracker@workspace:packages/usage-tracker"],
 

@@ -12,6 +12,7 @@
     "packages/openai-long-context",
     "packages/quota-fallback",
     "packages/reasoning-router",
+    "packages/subagent-control",
     "packages/usage-tracker",
     "packages/workplan-tools"
   ],

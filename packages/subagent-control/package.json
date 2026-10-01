@@ -1,0 +1,17 @@
+{
+  "name": "@hoshi-opencode2/subagent-control",
+  "version": "1.0.0",
+  "description": "OpenCode V2 tools that let a parent agent list and stop its own child sessions",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test": "bun test src/"
+  },
+  "dependencies": {
+    "@opencode/client": "2.0.20",
+    "@opencode/plugin": "2.0.20"
+  }
+}
