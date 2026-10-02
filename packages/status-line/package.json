@@ -1,0 +1,26 @@
+{
+  "name": "@hoshi-opencode2/status-line",
+  "version": "1.0.0",
+  "description": "OpenCode V2 status line: context, cache, live speed, uncommitted changes and elapsed time",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/hoshinoht/hoshi-opencode2.git",
+    "directory": "packages/status-line"
+  },
+  "type": "module",
+  "exports": {
+    "./tui": "./tui.ts"
+  },
+  "scripts": {
+    "test": "bun test src/"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.0.20"
+  },
+  "peerDependencies": {
+    "@opentui/core": ">=0.5.10",
+    "@opentui/solid": ">=0.5.10",
+    "solid-js": ">=1.9.0"
+  }
+}

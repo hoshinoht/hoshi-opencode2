@@ -16,6 +16,10 @@ Third-party components included in this repository keep their own licenses:
 - packages/usage-tracker/        Provider targets and quota concepts adapted from the
                                   MIT-licensed opencode-usage-tracker by Dylan Liew;
                                   independent implementation.
+- packages/status-line/          Lightweight port of the MIT-licensed
+                                  opencode-status-line by Rashid Razak
+                                  (https://github.com/rashidrazak/opencode-status-line);
+                                  speed-meter logic adapted (see its LICENSE.upstream).
 - skills/logo-design/            Adapted, lightweight version of logo-design-skill;
                                   MIT, Copyright (c) 2026 Kaan Kızıltuğ (kaankiziltug),
                                   https://github.com/kaankiziltug/logo-design-skill
