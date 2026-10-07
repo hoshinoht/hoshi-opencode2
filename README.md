@@ -184,7 +184,6 @@ opencode api GET /api/plugin
 | Add API keys (`.env`, `.exa-api-key`) | [docs/install.md](docs/install.md) |
 | Change an agent's permissions | edit `scripts/agent-permissions.yaml`, then `bun scripts/gen-agent-permissions.ts` |
 | Change reasoning effort per agent | `providerAgentPolicy` in `opencode.json`; see [docs/agents.md](docs/agents.md) |
-| Use these skills and MCP servers from Codex | [hoshi-codex](https://github.com/hoshinoht/hoshi-codex) links them from this checkout |
 
 | Upgrade OpenCode | bump every `@opencode/plugin` pin to the new version, then `bun install` |
 
