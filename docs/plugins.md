@@ -9,14 +9,16 @@ Local plugins live in `packages/`. Each is an `@hoshi-opencode2/*` package built
 | `reasoning-router` | yes | maps a subagent's requested effort class to provider reasoning effort |
 | `openai-long-context` | yes | adds 1M-context `-1m` variants of OpenAI models |
 | `usage-tracker` | yes | GitHub Copilot and OpenAI/Codex quota windows in the TUI |
-| `shiori` adapter (`vendor/shiori/adapter/opencode`) | yes | durable workplan lifecycle tools (Go core) |
+| `shiori` adapter (`vendor/shiori/adapter/opencode`) | no (MCP used) | optional native adapter for the Go workplan core |
+| `workplan-permissions` | yes | host role checks for Shiori MCP lifecycle calls |
 | `workplan-tools` | no (rollback) | previous TypeScript engine |
 | `cache-guard` | yes | advisory warning when an OpenAI prompt cache is likely going cold |
 | `quota-fallback` | no | model failover on quota or rate-limit errors |
 | `docs` | yes | pandoc document generation behind the `docs_*` tools |
 | `subagent-control` | yes | `subagent_list` and `subagent_stop`, which let a parent see and interrupt its own child sessions |
+| `image-budget` | no | keeps inline images in each model request under a count and byte budget |
 
-`opencode.json` also registers one third-party plugin, `@ex-machina/opencode-anthropic-auth@next`, and disables the built-in plan reminder with `"-opencode.plan"` (see [agents.md](agents.md#the-built-in-plan-reminder)).
+`opencode.json` also registers third-party plugins (see [Third-party plugins](#third-party-plugins)) disables the built-in plan reminder with `"-opencode.plan"` (see [agents.md](agents.md#the-built-in-plan-reminder)), and turns off the built-in that adds skills from `~/.claude/skills` and `~/.agents/skills` with `"-opencode.config.compatibility"`. Claude syncs your claude.ai skills into `~/.claude/skills/synced/`; they are written for Claude's own tools and added 13 unusable entries (about 11 KB) to every agent's skill list. Only `skills/` in this directory is loaded.
 
 ## reasoning-router
 
@@ -38,7 +40,7 @@ Native V2 tools for durable workplans: `workplan_create`, `workplan_inspect`, `w
 - **Durability:** writes are atomic and journalled, so an interrupted write can be recovered.
 - **Compaction:** `workplan_compact_preview` shows exactly what would be removed. Applying `workplan_compact` needs a fresh checkpoint and an explicit confirmation, and it archives the originals under `.opencode/workplan/archive/<id>/` first.
 - **Resuming:** `workplan_resume` returns a bounded continuation packet for picking work back up in a new session.
-- **Authorship:** only `plan` and `orchestrator` may create or change plans.
+- **Authorship:** OpenCode's agent permissions control tool access. `workplan-permissions` checks the trusted caller: only `plan` and `orchestrator` author plans, and only `orchestrator` writes checkpoints, applies compaction or recovers transactions.
 
 A read-only structural checker is also available. It checks shape, not acceptance:
 
@@ -46,16 +48,22 @@ A read-only structural checker is also available. It checks shape, not acceptanc
 bun ~/.config/opencode/scripts/check-workplan.ts <absolute-project-root> <workplan-id>
 ```
 
-**Replaced by Shiori.** Since 2026-09-30 the `workplan_*` tools are served by [Shiori](https://github.com/hoshinoht/shiori), vendored as the `vendor/shiori` submodule: same 13 tools, arguments, file formats and hashes, with a Go core (`shiori serve --stdio`) behind a small adapter. Registration in `opencode.json`:
+**Replaced by Shiori.** The `workplan_*` tools are served by [Shiori](https://github.com/hoshinoht/shiori), vendored as `vendor/shiori`. Since 2026-10-07 this setup uses `shiori mcp` over stdio, with the same 13 tool names and compatible plan formats. Registration under `mcp.servers` in `opencode.json`:
 
 ```jsonc
-{ "package": "./vendor/shiori/adapter/opencode",
-  "options": { "bin": "{env:HOME}/.config/opencode/vendor/shiori/shiori" } }
+"workplan": {
+  "type": "local",
+  "command": ["{env:HOME}/.config/opencode/vendor/shiori/shiori", "mcp", "--write-approval", "client"],
+  "codemode": true,
+  "disabled": false
+}
 ```
 
-Build the binary with `(cd vendor/shiori && CGO_ENABLED=0 go build -trimpath -o shiori ./cmd/shiori)`. The adapter only accepts OpenCode versions it has been verified against; after an OpenCode upgrade, update Shiori first.
+Build the binary with `(cd vendor/shiori && CGO_ENABLED=0 go build -trimpath -o shiori ./cmd/shiori)`. OpenCode supplies each project's MCP root; no global project path is hard-coded. `codemode: true` makes the tools discoverable through Code Mode; `workplan-permissions` pins them so the direct `workplan_*` calls remain available too. The client authorizes tool calls; Shiori rechecks hashes and file preconditions under its locks. The native adapter is not registered.
 
-**Rollback:** run `workplan_doctor` (or `vendor/shiori/shiori doctor --root <project>`) and confirm there are no pending transactions, then swap the entry back to `{ "package": "./packages/workplan-tools" }`. Never register both.
+The local `workplan-permissions` plugin wraps the existing MCP executors without registering additional tools. It restores role checks that the MCP server cannot perform because it receives no native agent identity, and limits the plan agent's new MCP resource read permission to server `workplan`.
+
+**Switch back to the native adapter:** disable the `workplan` MCP server and register `{ "package": "./vendor/shiori/adapter/opencode", "options": { "bin": "{env:HOME}/.config/opencode/vendor/shiori/shiori" } }` in `plugins`, then restart OpenCode. Both interfaces use the same core and artifacts; register one at a time. To return to the older TypeScript engine, first resolve pending journals and move the evidence, lanes and links sidecars out of its plan directory; it does not understand those files. Its package is outside the root workspaces, so restoring it also requires adding the workspace and running `bun install`.
 
 ## cache-guard
 
@@ -63,7 +71,7 @@ Registered with `mode: "advisory"`, `riskAfterMinutes: 30` and `minCacheReadToke
 
 ## quota-fallback (not registered)
 
-On a quota or rate-limit error it moves the session to a fallback model and retries there. Each agent can name its preferred target with a `# fallback-model:` line under `model:`. A per-session circuit breaker stops failover loops, and it never switches back on its own. Add it to `plugins` in `opencode.json` to turn it on.
+On a quota or rate-limit error it moves the session to a fallback model and retries there. Each agent can name its preferred target with a `# fallback-model:` line under `model:`. A per-session circuit breaker stops failover loops, and it never switches back on its own. Add it to `plugins` in `opencode.json` to turn it on. It is also out of the root `package.json` workspaces, so add it back there and run `bun install` too.
 
 ## docs
 
@@ -91,6 +99,37 @@ Cache lifetimes are per provider, in minutes, and are timed from the start of th
 The defaults follow the providers' documentation: Anthropic caches for 5 minutes by default (1 hour is opt-in, and OpenCode's default Anthropic cache policy does not request it), measured from the start of the request; OpenAI GPT-5.6+ keeps a prefix for at least 30 minutes after its last write or reuse. Both refresh on every use. Providers not listed, such as GitHub Copilot, which documents no lifetime, get no cache note. A cold resume re-writes the whole context at the cache-write price (1.25x base input on both providers, against 0.1x or less for a cache read), which is usually still cheaper than a fresh child redoing the work.
 
 Only `build` and `orchestrator` are allowed these tools ([permissions.md](permissions.md)); the other ask-by-default agents deny them explicitly.
+
+## image-budget (not registered)
+
+Every image a session has seen (a `read` of a screenshot, an MCP screenshot, a pasted image) is re-sent as base64 on every turn, so long visual-check sessions, typically `frontend-engineer` and `orchestrator`, eventually exceed a request limit and every later request fails. The tightest limit here is the 10 MiB request-body cap hard-coded in `@ex-machina/opencode-anthropic-auth` ([issue #277](https://github.com/ex-machina-co/opencode-anthropic-auth/issues/277)); the Anthropic API itself allows 32 MB.
+
+The plugin's `context` and `generate` hooks count the inline images in the outgoing request. While they fit the budget nothing changes. Once they do not, the oldest are replaced with a one-line note (with the file path to read again, when the tool call names one) until the newest fit in `pruneTo` of the budget, and older copies of a kept image are dropped. Pruned images stay pruned for the rest of the session, so the prompt prefix, and its cache, changes only on the turn a prune happens. The `compaction` hook removes every image from a summary request. Only the outgoing request changes; the stored session keeps the images. It applies to every agent and is a no-op until the budget is exceeded, so a session that is already failing recovers on its next request.
+
+```jsonc
+{ "package": "./packages/image-budget",
+  "options": { "maxImages": 12, "maxImageBytes": "6MiB", "pruneTo": 0.5,
+               "providers": { "anthropic": { "maxImageBytes": "6MiB" } } } }
+```
+
+The values shown are the defaults (`providers` is empty by default). Sizes are base64 bytes and accept a number or a string such as `"512KB"` or `"6MiB"` (binary units). The budget covers images only; leave headroom under the provider limit for text. Decisions are logged as `[image-budget] <session> (<agent>): request now omits N image(s)`.
+
+## Third-party plugins
+
+OpenCode installs these npm packages on first start.
+
+- **[opencode-anthropic-auth](https://github.com/ex-machina-co/opencode-anthropic-auth)** (`@ex-machina/opencode-anthropic-auth@next`) signs Anthropic requests with a Claude subscription. It rejects request bodies over 10 MiB ([issue #277](https://github.com/ex-machina-co/opencode-anthropic-auth/issues/277)), which is why [image-budget](#image-budget) exists.
+- **[opencode-notifier](https://github.com/mohak34/opencode-notifier)** (`@mohak34/opencode-notifier@latest`) raises a desktop popup and sound when a permission prompt waits, a session finishes, an error happens or the question tool fires. Alerts run in the terminal client, so `opencode run` and the Desktop/Web clients get none. It replaces OpenCode 2's built-in alerts, which `cli.json` turns off with `"-opencode.notifications"`. Settings live in `opencode-notifier.json` in this directory.
+- **[Dynamic Context Pruning](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning)** (`@tarquinen/opencode-dcp@latest`) adds a `compress` tool that replaces a finished span of the conversation with a summary. On trial since 2026-10-05 with a narrow setup in `dcp.jsonc`: it runs only in primary sessions (`experimental.allowSubAgents` is off), so only `build`, `orchestrator`, `plan` and `scholar` are allowed `compress`; the automatic deduplication and error-purge strategies are off, because they rewrite earlier history whenever a file is re-read or a tool fails and so break the prompt cache; compression reminders start at 200k tokens and strong nudges at 450k (the defaults, 50k and 100k, sit below the orchestrator's median peak of about 330k); and `protectUserMessages` keeps your messages verbatim. Every compression still invalidates the cache from that point on. It updates itself unless the version is pinned. Keep it if orchestrator compactions drop without a clear fall in cache reads; otherwise remove it.
+
+Present in `opencode.json` but commented out:
+
+- **[cc-safety-net](https://github.com/kenryu42/cc-safety-net)** (`cc-safety-net@latest`) blocks destructive git and filesystem commands and reads of secrets (SSH keys, `.env`) by parsing what a command does, so wrapping a command or reordering its flags does not hide it. It inspects `shell` calls and other tool inputs. Keep the `@latest` spec: its installer and `doctor` match on it. After uncommenting, check that it is active with `npx -y cc-safety-net@latest doctor`; `/cc-safety-net` explains a block. Until then, only the `shell-guard` patterns in [permissions.md](permissions.md) stand between the implementers and destructive commands.
+
+Not registered:
+
+- **opencode-recall** (`~/opencode-recall`, session-history search) is V1-only: it uses `@opencode-ai/plugin` 1.x and indexes the V1 `session`/`part`/`message` tables, which OpenCode 2 stopped writing on 2026-09-04 (V2 stores sessions in `session_v2`/`session_message`). It needs a V2 port before it can be registered.
+- **[opencode-pty](https://github.com/shekohex/opencode-pty)** (background and interactive PTY sessions). OpenCode 2.0.21 cannot load its `opencode-pty/v2` sub-entry (npm treats the spec as a GitHub shorthand and the install fails) and its default entry is V1-only; see [issue #67](https://github.com/shekohex/opencode-pty/issues/67). When it loads, note that its V2 entry does not check spawned commands against shell permission rules, and cc-safety-net sees only the `command` field, not `args`, so gate `pty_spawn` and `pty_write` with `ask` in `scripts/agent-permissions.yaml`.
 
 ## Related projects
 

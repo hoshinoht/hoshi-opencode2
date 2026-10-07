@@ -2,7 +2,7 @@
 description: Custom development orchestrator. Plans, delegates, integrates, and
   verifies complex code changes.
 mode: primary
-color: "#A78BFA"
+color: "#91ECF1"
 # model: openai/gpt-6.1-sol-1m#high
 model: anthropic/claude-opus-5-5#high
 # fallback-model: opencode/muse-spark-1.3-contributor-free#medium
@@ -10,6 +10,9 @@ permissions:
   - action: "*"
     resource: "*"
     effect: ask
+  - action: docs_*
+    resource: "*"
+    effect: deny
   - action: read
     resource: "*"
     effect: allow
@@ -37,13 +40,7 @@ permissions:
   - action: context7_*
     resource: "*"
     effect: allow
-  - action: deepwiki_*
-    resource: "*"
-    effect: allow
   - action: lsp-tools_*
-    resource: "*"
-    effect: allow
-  - action: grep_app_*
     resource: "*"
     effect: allow
   - action: workplan_read
@@ -65,6 +62,9 @@ permissions:
     resource: "*"
     effect: allow
   - action: workplan_compact_preview
+    resource: "*"
+    effect: allow
+  - action: opencode_list_mcp_resources
     resource: "*"
     effect: allow
   - action: edit
@@ -128,6 +128,9 @@ permissions:
     resource: frontend-engineer
     effect: allow
   - action: subagent
+    resource: fidelity
+    effect: allow
+  - action: subagent
     resource: code-checker
     effect: allow
   - action: subagent
@@ -149,6 +152,9 @@ permissions:
     resource: "*"
     effect: allow
   - action: subagent_stop
+    resource: "*"
+    effect: allow
+  - action: compress
     resource: "*"
     effect: allow
   - action: external_directory

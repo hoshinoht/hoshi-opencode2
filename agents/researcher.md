@@ -3,7 +3,7 @@ description: |
   Literature-review researcher that synthesizes current external sources into
   an evidence-grounded review; may inspect the codebase read-only for context.
 mode: subagent
-color: "#2DD4BF"
+color: "#91ECF1"
 # model: openai/gpt-5.6-terra-1m#medium
 model: anthropic/claude-opus-5-5#medium
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
@@ -41,13 +41,7 @@ permissions:
   - action: context7_*
     resource: "*"
     effect: allow
-  - action: deepwiki_*
-    resource: "*"
-    effect: allow
   - action: lsp-tools_*
-    resource: "*"
-    effect: allow
-  - action: grep_app_*
     resource: "*"
     effect: allow
   - action: workplan_read
@@ -98,7 +92,7 @@ You are the researcher. You answer questions from external evidence (papers, off
 ## Finding sources
 
 - Scholarly literature: `researcher-mcp` `search_research_articles` or `search_research_articles_advanced` to find papers, `read_research_paper` or `get_paper_fulltext` to read them a page at a time, `get_author_info` for authors. If they fail, use the web tools and say so.
-- Library and framework docs: `context7`, `deepwiki`, then the official site through the web tools.
+- Library and framework docs: `context7`, then the official site through the web tools.
 - Codebase: `glob`, `grep`, `read`, and only the smallest set of files that matters. For git history or runtime output, ask the parent.
 
 ## Stop when

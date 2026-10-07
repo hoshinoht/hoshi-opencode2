@@ -3,6 +3,7 @@ import { isProviderName, type ProviderName } from "./constants.ts";
 import type { UsageData } from "./format.ts";
 import { fetchCopilotUsage } from "./providers/copilot.ts";
 import { fetchOpenAIUsage } from "./providers/openai.ts";
+import { fetchAnthropicUsage } from "./providers/anthropic.ts";
 import type { ProviderRequestOptions } from "./providers/request.ts";
 
 export type UsageResult =
@@ -15,12 +16,14 @@ export interface UsageFetchOptions extends ProviderRequestOptions {
   readAuth?: () => Promise<AuthTokens>;
   copilot?: typeof fetchCopilotUsage;
   openai?: typeof fetchOpenAIUsage;
+  anthropic?: typeof fetchAnthropicUsage;
 }
 
 function isConfigured(tokens: AuthTokens, provider: ProviderName): boolean {
   if (provider === "copilot") return Boolean(tokens.copilot?.accessToken);
   if (provider === "openai") return Boolean(tokens.openai?.accessToken);
-  return Boolean(tokens.copilot?.accessToken || tokens.openai?.accessToken);
+  if (provider === "anthropic") return Boolean(tokens.anthropic?.accessToken);
+  return Boolean(tokens.copilot?.accessToken || tokens.openai?.accessToken || tokens.anthropic?.accessToken);
 }
 
 function failureData(provider: string, reason: unknown): UsageData {
@@ -33,7 +36,7 @@ function failureData(provider: string, reason: unknown): UsageData {
   };
 }
 
-/** Fetch one provider or both providers; all provider failures remain visible as rows. */
+/** Fetch one provider or all configured providers; failures remain visible as rows. */
 export async function fetchUsageResult(
   provider: ProviderName,
   options: UsageFetchOptions = {},
@@ -57,13 +60,14 @@ export async function fetchUsageResult(
       provider,
       message:
         provider === "all"
-          ? "No providers configured. Authenticate with Copilot or OpenAI/Codex first."
+          ? "No providers configured. Authenticate with Copilot, OpenAI/Codex, or Anthropic first."
           : `Provider not configured: ${provider}`,
     };
   }
 
   const copilot = options.copilot ?? fetchCopilotUsage;
   const openai = options.openai ?? fetchOpenAIUsage;
+  const anthropic = options.anthropic ?? fetchAnthropicUsage;
   const requests: Array<{ name: string; request: Promise<UsageData> }> = [];
 
   if ((provider === "all" || provider === "copilot") && tokens.copilot?.accessToken) {
@@ -76,6 +80,13 @@ export async function fetchUsageResult(
     requests.push({
       name: "OpenAI/Codex",
       request: openai(tokens.openai.accessToken, tokens.openai.accountId, options),
+    });
+  }
+
+  if ((provider === "all" || provider === "anthropic") && tokens.anthropic?.accessToken) {
+    requests.push({
+      name: "Anthropic",
+      request: anthropic(tokens.anthropic.accessToken, options),
     });
   }
 

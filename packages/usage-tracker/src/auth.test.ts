@@ -3,11 +3,19 @@ import {
   getAuthJsonPaths,
   mergeRuntimeOpenAI,
   normalizeAuth,
+  normalizeAnthropicCredential,
   normalizeOpenAICredential,
   readAuthTokens,
 } from "./auth.ts";
 
 describe("auth normalization", () => {
+  it("accepts Anthropic OAuth credentials from storage and the live integration, excluding API keys", () => {
+    const credential = { type: "oauth", access: " claude-token ", refresh: "private-refresh" };
+    expect(normalizeAnthropicCredential(credential)).toEqual({ accessToken: "claude-token" });
+    expect(normalizeAuth({ anthropic: credential })).toEqual({ anthropic: { accessToken: "claude-token" } });
+    expect(normalizeAuth({ anthropic: { type: "api", key: "api-key" } })).toEqual({});
+    expect(normalizeAnthropicCredential({ type: "oauth", access: " " })).toBeUndefined();
+  });
   it("normalizes provider aliases and trims credential metadata", () => {
     expect(
       normalizeAuth({

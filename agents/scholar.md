@@ -3,7 +3,7 @@ description: Academic research and LaTeX authoring agent. Finds and verifies
   scholarly sources, drafts and compiles LaTeX papers with BibTeX/biblatex,
   and proofreads for evidence, argument, and style.
 mode: primary
-color: "#A78BFA"
+color: "#C4A2D4"
 # model: openai/gpt-5.6-terra-1m#high
 model: anthropic/claude-opus-5-5#medium
 permissions:
@@ -44,9 +44,6 @@ permissions:
     resource: "*"
     effect: allow
   - action: context7_*
-    resource: "*"
-    effect: allow
-  - action: deepwiki_*
     resource: "*"
     effect: allow
   - action: edit
@@ -118,6 +115,9 @@ permissions:
   - action: subagent
     resource: experimenter
     effect: allow
+  - action: compress
+    resource: "*"
+    effect: allow
   - action: workplan_create
     resource: "*"
     effect: deny
@@ -128,6 +128,12 @@ permissions:
     resource: "*"
     effect: deny
   - action: workplan_reset
+    resource: "*"
+    effect: deny
+  - action: workplan_checkpoint
+    resource: "*"
+    effect: deny
+  - action: workplan_compact
     resource: "*"
     effect: deny
   - action: external_directory

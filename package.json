@@ -8,13 +8,13 @@
   "workspaces": [
     "packages/cache-guard",
     "packages/docs",
+    "packages/image-budget",
 
     "packages/openai-long-context",
-    "packages/quota-fallback",
     "packages/reasoning-router",
     "packages/subagent-control",
     "packages/usage-tracker",
-    "packages/workplan-tools"
+    "packages/workplan-permissions"
   ],
   "scripts": {
     "test": "bun test",

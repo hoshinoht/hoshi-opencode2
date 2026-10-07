@@ -19,7 +19,7 @@
 > Models, reasoning effort, tool permissions and delegation rules are declared here, not improvised per session. Every agent gets only the tools its role needs.
 
 > [!NOTE]
-> OpenCode 1 plugins are not loaded. Workplan tools are served by [Shiori](https://github.com/hoshinoht/shiori) (`vendor/shiori`), a Go core with an OpenCode adapter.
+> OpenCode 1 plugins are not loaded. Workplan tools are served by [Shiori](https://github.com/hoshinoht/shiori) (`vendor/shiori`) over MCP stdio.
 
 ## At a glance
 
@@ -27,8 +27,8 @@
 | --- | --- |
 | **Entry points** | `build` (default) for everyday work · `/dev` for orchestrated features · `scholar` for papers |
 | **Agents** | 17: 4 primary, 1 dual-mode (`plan`), 12 subagents, each with generated least-privilege permissions |
-| **Plugins** | reasoning-router · openai-long-context · usage-tracker · shiori (workplan) · cache-guard · docs · subagent-control |
-| **MCP servers** | [gofetch](https://github.com/hoshinoht/gofetch-mcp) · [researcher-mcp](https://github.com/hoshinoht/researcher-mcp) · context7 · deepwiki · grep_app · lsp-tools · [ats-tailor](https://github.com/hoshinoht/ats-tailor) (disabled by default) |
+| **Plugins** | reasoning-router · openai-long-context · usage-tracker · workplan-permissions · cache-guard · docs · subagent-control |
+| **MCP servers** | [Shiori](https://github.com/hoshinoht/shiori) (`workplan`) · [gofetch](https://github.com/hoshinoht/gofetch-mcp) · [researcher-mcp](https://github.com/hoshinoht/researcher-mcp) · context7 · lsp-tools · deepwiki and grep_app (disabled) · [ats-tailor](https://github.com/hoshinoht/ats-tailor) (disabled by default) |
 | **Skills** | 17 [Agent Skills](https://agentskills.io), most of them platform-agnostic |
 
 ## Features
@@ -93,7 +93,8 @@ Roles, built-in overrides and reasoning tiers: [docs/agents.md](docs/agents.md).
 | `git-commit` | commit conventions, granularity and branch safety |
 | `ast-grep` | search and rewrite by syntax tree |
 | `property-based-testing` | generative and property-based tests |
-| `shell-strategy` | non-interactive, distro-aware shell use |
+| `simplify-review` | over-engineering-only review: what to delete or replace, one line per finding |
+| `shell-strategy` | Linux host shell patterns (packages, services, distro detection) |
 | `frontend-design` / `frontend-design-studio` | frontend UX and visual direction |
 | `metric-loop` | keep-or-revert experiment loop against a mechanical metric |
 | `logo-design` | logo design with SVG audit, render and export scripts |
@@ -109,8 +110,8 @@ Roles, built-in overrides and reasoning tiers: [docs/agents.md](docs/agents.md).
 | `reasoning-router` | maps each agent to a reasoning-effort range per provider |
 | `openai-long-context` | adds `-1m` long-context variants of OpenAI models |
 | `usage-tracker` | Copilot and OpenAI/Codex quota view (`/usage`) |
-| `shiori` (`vendor/shiori`) | the 13 `workplan_*` tools for durable plans, checkpoints and recovery, served by a Go core |
 | `workplan-tools` | previous TypeScript engine; kept for rollback, not registered |
+| `workplan-permissions` | preserves lifecycle roles and scopes plan-agent resource reads for Shiori MCP |
 | `cache-guard` | advisory warning before an idle prompt cache expires |
 | `docs` | pandoc reports, school reports and styled PDFs (`docs_*` tools) |
 | `subagent-control` | `subagent_list` and `subagent_stop`, so `build` and `orchestrator` can see and interrupt their own subagents |
@@ -141,13 +142,13 @@ flowchart LR
   S --> DP
   subgraph Plugins["Local plugins"]
     RR[reasoning-router]
-    WP[shiori workplan]
     DC[docs]
   end
   subgraph MCP["MCP servers"]
+    WP[shiori workplan]
     GF[gofetch]
     RM[researcher-mcp]
-    C7[context7 · deepwiki · grep_app]
+    C7[context7]
   end
   Workers -.-> Plugins
   Workers -.-> MCP

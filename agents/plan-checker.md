@@ -2,7 +2,7 @@
 description: Plan verification specialist. Reviews workplans, specs, handoffs,
   and workflow risks before implementation.
 mode: subagent
-color: "#FB7185"
+color: "#FFD0DF"
 # model: openai/gpt-6.1-sol-1m#high
 model: anthropic/claude-opus-5-5#medium
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
@@ -35,9 +35,6 @@ permissions:
     resource: "*"
     effect: allow
   - action: context7_*
-    resource: "*"
-    effect: allow
-  - action: deepwiki_*
     resource: "*"
     effect: allow
   - action: lsp-tools_*

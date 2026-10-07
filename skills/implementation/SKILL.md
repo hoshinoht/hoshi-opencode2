@@ -32,6 +32,8 @@ Your agent prompt sets how much you may decide on your own and when you must han
 
 - Make the smallest correct change, in the style already there: naming, structure, typing, error handling, test layout.
 - Add no speculative fallbacks, compatibility shims, one-off abstractions or configuration nobody asked for.
+- Before writing new code, use the first of these that covers the need: a helper or pattern already in the repository, the standard library, a native platform feature, an already-installed dependency. Write custom code only when none fits; a new dependency is a parent decision.
+- For a bug fix, find every caller of the function you change. Fix the shared function once rather than guarding only the path the report names. If that changes behaviour for other callers, it is a scope decision for the parent.
 - A bug fix is not a cleanup. Leave unrelated code as it is, and list pre-existing problems you notice in the receipt instead of fixing them.
 - Other agents may be editing neighbouring files at the same time, so an edit outside your scope can collide with theirs. Report needed out-of-scope changes to the parent.
 - Run the repository's formatter or autofix command instead of formatting by hand.

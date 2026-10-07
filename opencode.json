@@ -27,10 +27,23 @@
   },
   "mcp": {
     "servers": {
+      "workplan": {
+        // Shiori uses the current project's MCP root supplied by OpenCode.
+        "type": "local",
+        "command": [
+          "{env:HOME}/.config/opencode/vendor/shiori/shiori",
+          "mcp",
+          "--write-approval",
+          "client"
+        ],
+        "codemode": true,
+        "disabled": false
+      },
       "deepwiki": {
         "type": "remote",
         "url": "https://mcp.deepwiki.com/mcp",
-        "disabled": false
+        // Off 2026-10-05: 11 calls in 30 days; context7 and gofetch cover library docs and the web.
+        "disabled": true
       },
       "context7": {
         "type": "remote",
@@ -82,8 +95,9 @@
           "node $HOME/.config/opencode/mcps/lsp-tools-mcp/mcp-no-idle.mjs"
         ],
         "environment": {
-          "LSP_TOOLS_MCP_PROJECT_CONFIG": ".opencode/lsp.json",
-          "LSP_TOOLS_MCP_USER_CONFIG": ".config/opencode/lsp.json"
+          // Optional per-project override; without it the built-in server list applies
+          // (TypeScript and Python need typescript-language-server and basedpyright from brew).
+          "LSP_TOOLS_MCP_PROJECT_CONFIG": ".opencode/lsp.json"
         },
         "disabled": false
       },
@@ -91,13 +105,21 @@
         "type": "remote",
         "url": "https://mcp.grep.app",
         "oauth": false,
-        "disabled": false
+        // Off 2026-10-05: 12 calls in 30 days.
+        "disabled": true
       }
     }
   },
   "plugins": [
     // The custom plan agent owns repository artifacts, not ~/.opencode/plan.
     "-opencode.plan",
+    // Skip ~/.claude/skills and ~/.agents/skills: they hold claude.ai-synced skills written for
+    // Claude's own tools, which added ~11 KB of irrelevant entries to every skill listing.
+    "-opencode.config.compatibility",
+    {
+      // Preserve lifecycle role checks while Shiori is served over MCP.
+      "package": "./packages/workplan-permissions"
+    },
     {
       "package": "./packages/reasoning-router",
       "options": {
@@ -129,14 +151,10 @@
     },
 
     {
-      "package": "./packages/usage-tracker"
-    },
-    {
-      // Workplan tools served by Shiori (vendor/shiori). Rollback: swap back to
-      // "./packages/workplan-tools" after workplan_doctor shows no pending journals.
-      // Never register both.
-      "package": "./vendor/shiori/adapter/opencode",
-      "options": { "bin": "{env:HOME}/.config/opencode/vendor/shiori/shiori" }
+      "package": "./packages/usage-tracker",
+      "options": {
+        "quotaReminderRemainingPercent": { "openai": 10, "anthropic": 10 }
+      }
     },
     {
       "package": "./packages/docs"
@@ -146,6 +164,10 @@
       "package": "./packages/subagent-control"
     },
     {
+      // Keeps inline images under a budget so screenshot-heavy sessions stay under request limits.
+      "package": "./packages/image-budget"
+    },
+    {
       "package": "./packages/cache-guard",
       "options": {
         "mode": "advisory",
@@ -153,7 +175,15 @@
         "minCacheReadTokens": 10000
       }
     },
-    "@ex-machina/opencode-anthropic-auth@next"
+    "@ex-machina/opencode-anthropic-auth@next",
+    // Desktop/sound alerts for permission prompts, finished sessions, errors and questions.
+    // Replaces the built-in alerts, which cli.json turns off with "-opencode.notifications".
+    "@mohak34/opencode-notifier@latest",
+    // Model-invoked `compress` for long primary sessions; automatic pruning is off (see dcp.jsonc).
+    "@tarquinen/opencode-dcp@latest",
+    // Blocks destructive git/filesystem commands and secret reads. Keep the @latest spec (its
+    // installer and doctor match on it); check with `npx -y cc-safety-net@latest doctor`.
+    // "cc-safety-net@latest",
   ],
   "providers": {},
   "model": "openai/gpt-5.6-terra-1m"

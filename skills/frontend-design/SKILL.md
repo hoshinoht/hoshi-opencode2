@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: "Frontend UI/UX principles (HCI, Gestalt, information architecture, accessibility, dashboards, mobile). Use for any frontend implementation or design review."
+description: "Frontend UI/UX principles (HCI, Gestalt, information architecture, accessibility, dashboards, mobile). Load when building or changing UI, or when reviewing a UI for usability, layout or accessibility. Not needed to review frontend logic, types, tests or wiring."
 license: MIT
 metadata:
   version: 0.3.0

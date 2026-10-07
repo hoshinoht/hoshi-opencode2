@@ -1,0 +1,16 @@
+{
+  "name": "@hoshi-opencode2/image-budget",
+  "version": "1.0.0",
+  "description": "OpenCode V2 plugin that keeps inline images in model requests under a count and byte budget",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test": "bun test src/"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.0.20"
+  }
+}

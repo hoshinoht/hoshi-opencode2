@@ -3,7 +3,7 @@ description: Run a bounded metric-driven experiment loop in an isolated git
   worktree; keep or revert each change by a mechanical metric and report
   baseline, best and results.tsv. Never merges or pushes.
 mode: subagent
-color: "#FB923C"
+color: "#DDA05C"
 model: openai/gpt-5.6-terra-1m#high
 permissions:
   - action: "*"
@@ -34,9 +34,6 @@ permissions:
     resource: "*"
     effect: allow
   - action: context7_*
-    resource: "*"
-    effect: allow
-  - action: deepwiki_*
     resource: "*"
     effect: allow
   - action: workplan_read
@@ -94,6 +91,12 @@ permissions:
     resource: "*"
     effect: deny
   - action: workplan_reset
+    resource: "*"
+    effect: deny
+  - action: workplan_checkpoint
+    resource: "*"
+    effect: deny
+  - action: workplan_compact
     resource: "*"
     effect: deny
   - action: external_directory

@@ -3,7 +3,7 @@ description: |
   Document-authoring subagent for polished technical and academic writing.
   Produces papers, reports and styled PDFs through the pandoc-based docs toolchain.
 mode: subagent
-color: "#E879F9"
+color: "#C4A2D4"
 # model: openai/gpt-5.6-terra-1m#medium
 model: anthropic/claude-opus-5-5#medium
 # fallback-model: opencode/muse-spark-1.3-contributor-free#medium
@@ -42,9 +42,6 @@ permissions:
     resource: "*"
     effect: allow
   - action: context7_*
-    resource: "*"
-    effect: allow
-  - action: deepwiki_*
     resource: "*"
     effect: allow
   - action: workplan_read
@@ -93,6 +90,12 @@ permissions:
     resource: "*"
     effect: deny
   - action: workplan_reset
+    resource: "*"
+    effect: deny
+  - action: workplan_checkpoint
+    resource: "*"
+    effect: deny
+  - action: workplan_compact
     resource: "*"
     effect: deny
   - action: docs_*

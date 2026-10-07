@@ -2,9 +2,9 @@
 description: Academic proofreader. Reviews documents for evidence, argument
   quality, and style without editing files.
 mode: subagent
-color: "#38BDF8"
-# model: openai/gpt-5.6-terra-1m#medium
-model: anthropic/claude-opus-5-5#low
+color: "#FFD4E2"
+model: openai/gpt-5.6-terra-1m#medium
+# model: anthropic/claude-opus-5-5#low
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
 permissions:
   - action: "*"
@@ -35,9 +35,6 @@ permissions:
     resource: "*"
     effect: allow
   - action: context7_*
-    resource: "*"
-    effect: allow
-  - action: deepwiki_*
     resource: "*"
     effect: allow
   - action: workplan_read

@@ -4,24 +4,30 @@ import { useTerminalDimensions } from "@opentui/solid";
 import { Plugin, usePlugin } from "@opencode/plugin/tui";
 import { createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { formatUsagePercent, usageBarSegments, usageBarWidth, usageDialogSize } from "./dashboard.ts";
-import { providerLabel, type ProviderName, TUI_PLUGIN_ID } from "./constants.ts";
+import { isProviderName, providerLabel, type ProviderName, TUI_PLUGIN_ID } from "./constants.ts";
 import { UsageTrackerRpc } from "./rpc.ts";
 import type { UsageData, UsageWindow } from "./format.ts";
 import type { UsageResult } from "./usage.ts";
+import { usageTheme } from "./theme.ts";
 
 const PROVIDER_OPTIONS = [
-  { title: "All Providers", value: "all" as const, description: "Compare Copilot and OpenAI/Codex quotas" },
+  { title: "All Providers", value: "all" as const, description: "Compare Copilot, OpenAI/Codex, and Anthropic quotas" },
   { title: "GitHub Copilot", value: "copilot" as const, description: "Premium and chat request quota" },
   { title: "OpenAI/Codex", value: "openai" as const, description: "Five-hour, weekly, and credit usage" },
+  { title: "Anthropic", value: "anthropic" as const, description: "Five-hour and weekly Claude usage" },
 ];
 
 type DashboardState = { readonly kind: "loading" } | UsageResult;
 
-function usageColor(percent: number) {
-  const theme = usePlugin().theme;
-  if (percent >= 90) return theme.text.feedback.error.default;
-  if (percent >= 75) return theme.text.feedback.warning.default;
-  return theme.text.feedback.info.default;
+function useUsageTheme() {
+  const context = usePlugin();
+  return () => usageTheme(context.theme);
+}
+
+function usageColor(percent: number, theme: ReturnType<typeof usageTheme>) {
+  if (percent >= 90) return theme.error;
+  if (percent >= 75) return theme.warning;
+  return theme.info;
 }
 
 function metadataRows(provider: UsageData): Array<{ readonly label: string; readonly value: string }> {
@@ -33,36 +39,36 @@ function metadataRows(provider: UsageData): Array<{ readonly label: string; read
 }
 
 function UsageBar(props: { readonly window: UsageWindow; readonly terminalWidth: number }) {
-  const theme = usePlugin().theme;
+  const theme = useUsageTheme();
   const bar = () => usageBarSegments(props.window.usedPercent, usageBarWidth(props.terminalWidth));
-  const color = () => usageColor(props.window.usedPercent);
+  const color = () => usageColor(props.window.usedPercent, theme());
 
   return (
     <box flexDirection="column" gap={0} paddingBottom={1}>
       <box flexDirection="row" justifyContent="space-between" gap={1}>
-        <text fg={theme.text.default}>{props.window.label}</text>
+        <text fg={theme().text}>{props.window.label}</text>
         <text fg={color()} attributes={TextAttributes.BOLD}>
           {formatUsagePercent(props.window.usedPercent)}
         </text>
       </box>
       <box flexDirection="row" gap={0}>
         <text fg={color()}>{bar().filled}</text>
-        <text fg={theme.border.default}>{bar().empty}</text>
+        <text fg={theme().border}>{bar().empty}</text>
       </box>
     </box>
   );
 }
 
 function MetadataRows(props: { readonly rows: readonly { readonly label: string; readonly value: string }[] }) {
-  const theme = usePlugin().theme;
+  const theme = useUsageTheme();
   return (
     <For each={props.rows}>
       {(row) => (
         <box flexDirection="row" justifyContent="space-between" gap={2}>
-          <text fg={theme.text.subdued} wrapMode="word">
+          <text fg={theme().muted} wrapMode="word">
             {row.label}
           </text>
-          <text fg={theme.text.default} wrapMode="word">
+          <text fg={theme().text} wrapMode="word">
             {row.value}
           </text>
         </box>
@@ -72,7 +78,7 @@ function MetadataRows(props: { readonly rows: readonly { readonly label: string;
 }
 
 function ProviderCard(props: { readonly provider: UsageData; readonly terminalWidth: number }) {
-  const theme = usePlugin().theme;
+  const theme = useUsageTheme();
   const rows = () => metadataRows(props.provider);
 
   return (
@@ -80,16 +86,16 @@ function ProviderCard(props: { readonly provider: UsageData; readonly terminalWi
       flexDirection="column"
       padding={1}
       marginBottom={1}
-      backgroundColor={theme.background.surface.offset}
-      borderColor={props.provider.error ? theme.text.feedback.error.default : theme.border.default}
+      backgroundColor={theme().background}
+      borderColor={props.provider.error ? theme().error : theme().border}
       borderStyle="rounded"
     >
       <box flexDirection="row" justifyContent="space-between" gap={2} paddingBottom={1}>
-        <text fg={theme.text.default} attributes={TextAttributes.BOLD} wrapMode="word">
+        <text fg={theme().text} attributes={TextAttributes.BOLD} wrapMode="word">
           {props.provider.provider}
         </text>
         <Show when={props.provider.planType}>
-          <text fg={theme.text.subdued} wrapMode="word">
+          <text fg={theme().muted} wrapMode="word">
             {props.provider.planType}
           </text>
         </Show>
@@ -99,11 +105,11 @@ function ProviderCard(props: { readonly provider: UsageData; readonly terminalWi
         when={!props.provider.error}
         fallback={
           <box flexDirection="column" gap={0}>
-            <text fg={theme.text.feedback.error.default} attributes={TextAttributes.BOLD}>
+            <text fg={theme().error} attributes={TextAttributes.BOLD}>
               Unable to retrieve usage for this provider.
             </text>
-            <text fg={theme.text.subdued}>{props.provider.error}</text>
-            <text fg={theme.text.subdued} wrapMode="word">
+            <text fg={theme().muted}>{props.provider.error}</text>
+            <text fg={theme().muted} wrapMode="word">
               Check your connection and provider sign-in, then run /usage again.
             </text>
           </box>
@@ -111,7 +117,7 @@ function ProviderCard(props: { readonly provider: UsageData; readonly terminalWi
       >
         <Show
           when={props.provider.windows.length > 0 || rows().length > 0}
-          fallback={<text fg={theme.text.subdued}>No usage windows or account details were reported.</text>}
+          fallback={<text fg={theme().muted}>No usage windows or account details were reported.</text>}
         >
           <For each={props.provider.windows}>
             {(window) => <UsageBar window={window} terminalWidth={props.terminalWidth} />}
@@ -124,24 +130,24 @@ function ProviderCard(props: { readonly provider: UsageData; readonly terminalWi
 }
 
 function ResultNotice(props: { readonly result: Exclude<UsageResult, { readonly kind: "ok" }> }) {
-  const theme = usePlugin().theme;
+  const theme = useUsageTheme();
   const isError = () => props.result.kind === "error";
   return (
     <box
       flexDirection="column"
       padding={1}
-      backgroundColor={theme.background.surface.offset}
-      borderColor={isError() ? theme.text.feedback.error.default : theme.border.default}
+      backgroundColor={theme().background}
+      borderColor={isError() ? theme().error : theme().border}
       borderStyle="rounded"
     >
-      <text fg={isError() ? theme.text.feedback.error.default : theme.text.default} attributes={TextAttributes.BOLD}>
+      <text fg={isError() ? theme().error : theme().text} attributes={TextAttributes.BOLD}>
         {isError() ? "Usage could not be retrieved" : "No provider is connected"}
       </text>
-      <text fg={theme.text.subdued} wrapMode="word">
+      <text fg={theme().muted} wrapMode="word">
         {props.result.message}
       </text>
       <Show when={isError()}>
-        <text fg={theme.text.subdued} wrapMode="word">
+        <text fg={theme().muted} wrapMode="word">
           Check your connection and provider sign-in, then run /usage again.
         </text>
       </Show>
@@ -151,6 +157,7 @@ function ResultNotice(props: { readonly result: Exclude<UsageResult, { readonly 
 
 function UsageDashboard(props: { readonly provider: ProviderName }) {
   const context = usePlugin();
+  const theme = useUsageTheme();
   const dimensions = useTerminalDimensions();
   const [state, setState] = createSignal<DashboardState>({ kind: "loading" });
   let active = true;
@@ -184,20 +191,20 @@ function UsageDashboard(props: { readonly provider: ProviderName }) {
   return (
     <box flexDirection="column" paddingLeft={2} paddingRight={2} paddingBottom={1}>
       <box flexDirection="row" justifyContent="space-between" gap={2} paddingBottom={1}>
-        <text fg={context.theme.text.default} attributes={TextAttributes.BOLD}>
+        <text fg={theme().text} attributes={TextAttributes.BOLD}>
           Usage dashboard
         </text>
-        <text fg={context.theme.text.subdued}>{providerLabel(props.provider)}</text>
+        <text fg={theme().muted}>{providerLabel(props.provider)}</text>
       </box>
       <scrollbox maxHeight={maxHeight()}>
         <Show
           when={result().kind !== "loading"}
           fallback={
-            <box flexDirection="column" padding={1} borderColor={context.theme.border.default} borderStyle="rounded">
-              <text fg={context.theme.text.default} attributes={TextAttributes.BOLD}>
+            <box flexDirection="column" padding={1} borderColor={theme().border} borderStyle="rounded">
+              <text fg={theme().text} attributes={TextAttributes.BOLD}>
                 Fetching usage data
               </text>
-              <text fg={context.theme.text.subdued}>Contacting {providerLabel(props.provider)}…</text>
+              <text fg={theme().muted}>Contacting {providerLabel(props.provider)}…</text>
             </box>
           }
         >
@@ -228,7 +235,7 @@ function UsageCommands() {
       placeholder: "Choose provider",
       options: PROVIDER_OPTIONS,
     });
-    if (provider === "all" || provider === "copilot" || provider === "openai") openUsage(provider);
+    if (isProviderName(provider)) openUsage(provider);
   };
 
   context.keymap.layer(() => ({
@@ -238,7 +245,7 @@ function UsageCommands() {
       {
         id: "usage-tracker.open",
         title: "Usage",
-        description: "Show GitHub Copilot and OpenAI/Codex usage",
+        description: "Show GitHub Copilot, OpenAI/Codex, and Anthropic usage",
         group: "Usage",
         palette: true,
         slash: { name: "usage" },

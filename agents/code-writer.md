@@ -3,18 +3,12 @@ description: |
   Scoped implementation subagent that checks current docs before writing code.
   Carries out a single plan step or review-fix pass per delegation.
 mode: subagent
-color: "#34D399"
+color: "#78E1D0"
 # model: openai/gpt-6-luna-1m#max
 model: anthropic/claude-opus-5-5#low
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
 permissions:
   - action: "*"
-    resource: "*"
-    effect: ask
-  - action: subagent_list
-    resource: "*"
-    effect: deny
-  - action: subagent_stop
     resource: "*"
     effect: deny
   - action: read
@@ -42,9 +36,6 @@ permissions:
     resource: "*"
     effect: allow
   - action: context7_*
-    resource: "*"
-    effect: allow
-  - action: deepwiki_*
     resource: "*"
     effect: allow
   - action: lsp-tools_*
@@ -96,6 +87,12 @@ permissions:
     resource: "*"
     effect: deny
   - action: workplan_reset
+    resource: "*"
+    effect: deny
+  - action: workplan_checkpoint
+    resource: "*"
+    effect: deny
+  - action: workplan_compact
     resource: "*"
     effect: deny
   - action: external_directory

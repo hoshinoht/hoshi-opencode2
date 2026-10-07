@@ -1,13 +1,16 @@
 ---
 description: Lightweight development orchestrator for everyday fixes and focused changes.
 mode: primary
-color: "#4F8CC9"
+color: "#7BC1F2"
 # model: openai/gpt-6.1-sol-1m#high
 model: anthropic/claude-opus-5-5#medium
 permissions:
   - action: "*"
     resource: "*"
     effect: ask
+  - action: docs_*
+    resource: "*"
+    effect: deny
   - action: read
     resource: "*"
     effect: allow
@@ -35,13 +38,7 @@ permissions:
   - action: context7_*
     resource: "*"
     effect: allow
-  - action: deepwiki_*
-    resource: "*"
-    effect: allow
   - action: lsp-tools_*
-    resource: "*"
-    effect: allow
-  - action: grep_app_*
     resource: "*"
     effect: allow
   - action: edit
@@ -87,6 +84,9 @@ permissions:
     resource: frontend-engineer
     effect: allow
   - action: subagent
+    resource: fidelity
+    effect: allow
+  - action: subagent
     resource: tester
     effect: allow
   - action: subagent
@@ -110,6 +110,9 @@ permissions:
   - action: subagent_stop
     resource: "*"
     effect: allow
+  - action: compress
+    resource: "*"
+    effect: allow
   - action: workplan_create
     resource: "*"
     effect: deny
@@ -120,6 +123,12 @@ permissions:
     resource: "*"
     effect: deny
   - action: workplan_reset
+    resource: "*"
+    effect: deny
+  - action: workplan_checkpoint
+    resource: "*"
+    effect: deny
+  - action: workplan_compact
     resource: "*"
     effect: deny
   - action: external_directory

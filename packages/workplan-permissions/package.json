@@ -1,0 +1,11 @@
+{
+  "name": "@hoshi-opencode2/workplan-permissions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OpenCode role checks for Shiori MCP lifecycle tools",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": { ".": "./index.ts" },
+  "scripts": { "test": "bun test src/" },
+  "dependencies": { "@opencode/plugin": "2.0.20" }
+}

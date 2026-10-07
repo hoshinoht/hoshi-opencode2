@@ -6,8 +6,9 @@
 |---|---|
 | OpenCode 2 | everything (V2 only; OpenCode 1 plugins are not supported) |
 | Bun | tests, typecheck and the repo scripts |
-| Go | building the `gofetch-mcp` and `researcher-mcp` submodules |
+| Go | building Shiori, `gofetch-mcp` and `researcher-mcp` |
 | Node | running `lsp-tools-mcp` |
+| `typescript-language-server`, `basedpyright` | TypeScript and Python support in `lsp-tools-mcp` (`brew install typescript-language-server basedpyright`); without them its tools return nothing for those languages. Projects supply their own `typescript` |
 | TeX Live / MacTeX | optional; needed by the docs plugin and scholar |
 
 ## Steps
@@ -32,11 +33,12 @@ bun install
 ### 3. Build the MCP servers
 
 ```sh
+(cd vendor/shiori && CGO_ENABLED=0 go build -trimpath -o shiori ./cmd/shiori)
 make -C mcps/gofetch-mcp build                     # -> mcps/gofetch-mcp/bin/gofetch
 cd mcps/researcher-mcp && go build -o bin/researcher-mcp ./cmd/google-scholar-mcp
 ```
 
-`opencode.json` expects the binaries at exactly those `bin/` paths. `mcps/lsp-tools-mcp` ships its built runtime and runs under `node` with no build step.
+`opencode.json` expects Shiori at `vendor/shiori/shiori` and the other built servers at the `bin/` paths above. `mcps/lsp-tools-mcp` ships its built runtime and runs under `node` with no build step.
 
 ### 4. Secrets
 

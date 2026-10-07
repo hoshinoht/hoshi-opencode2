@@ -1,6 +1,6 @@
 ---
 name: shell-strategy
-description: ALWAYS USE before executing shell commands; distro-aware non-interactive shell, package, service, and background-job patterns.
+description: Linux host shell patterns — distro detection, pacman/apt package commands, systemd services and logs, screen/tmux jobs. Load before package, service or distro-specific commands on a Linux server, container or remote; general shell rules are in AGENTS.md.
 license: MIT
 metadata:
   domain: shell
@@ -9,9 +9,7 @@ metadata:
 
 ## Core rules
 
-Always use this skill before executing shell commands.
-
-Always identify the target distro before distro-specific package or service commands. Local workstation is usually Arch Linux; servers are often Debian/Ubuntu; containers and remotes can differ.
+Always identify the target distro before distro-specific package or service commands. The local workstation is macOS (see AGENTS.md); servers are often Debian/Ubuntu; Arch, containers and other remotes differ.
 
 - Normal shell calls are non-interactive; avoid editors, pagers, REPLs, and menu prompts.
 - Prefer native file/read/search/edit tools over shell for file operations.

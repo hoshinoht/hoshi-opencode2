@@ -13,7 +13,6 @@ fragments:
     - [websearch, "*", allow]
     - [gofetch_*, "*", allow]
     - [context7_*, "*", allow]
-    - [deepwiki_*, "*", allow]
   workplan-read:
     - [workplan_read, "*", allow]
     - [workplan_list, "*", allow]
@@ -34,6 +33,8 @@ fragments:
     - [workplan_update, "*", deny]
     - [workplan_patch, "*", deny]
     - [workplan_reset, "*", deny]
+    - [workplan_checkpoint, "*", deny]
+    - [workplan_compact, "*", deny]
   external-dirs:
     - [external_directory, "*", ask]
     - [external_directory, ~/.config/opencode/skills/*, allow]
@@ -60,11 +61,11 @@ agents:
     - [ats-tailor_ats_reject_proposal, "*", ask]
   build:
     - ["*", "*", ask]
+    - [docs_*, "*", deny]  # report tooling: document-writer and scholar only; keeps ~4.7 KB out of the catalog
     - "@core-read"
     - [question, "*", allow]
     - "@web"
     - [lsp-tools_*, "*", allow]
-    - [grep_app_*, "*", allow]
     - "@implement"
     - [subagent, "*", deny]
     - [subagent, explore, allow]
@@ -74,6 +75,7 @@ agents:
     - [subagent, code-writer, allow]
     - [subagent, code-engineer, allow]
     - [subagent, frontend-engineer, allow]
+    - [subagent, fidelity, allow]  # repo-local project agent (.opencode/agents/fidelity.md)
     - [subagent, tester, allow]
     - [subagent, code-checker, allow]
     - [subagent, oracle, allow]
@@ -82,6 +84,7 @@ agents:
     - [subagent, experimenter, allow]
     - [subagent_list, "*", allow]
     - [subagent_stop, "*", allow]  # the tool itself refuses sessions that are not the caller's children
+    - [compress, "*", allow]  # DCP context compression (primary sessions only)
     - "@workplan-write-deny"
     - "@external-dirs"
     - "@env-guard"
@@ -90,7 +93,7 @@ agents:
     - "@core-read"
     - [question, "*", deny]
     - "@web"
-    - [grep_app_*, "*", allow]
+    - [lsp-tools_*, "*", allow]  # diagnostics and references while reviewing
     - "@workplan-read"
     - [shell, git status --short, allow]
     - [shell, git status --porcelain*, allow]
@@ -102,9 +105,7 @@ agents:
     - [external_directory, /private/var/folders/*/T/opencode/*.diff, allow]
     - "@env-guard"
   code-engineer:
-    - ["*", "*", ask]
-    - [subagent_list, "*", deny]
-    - [subagent_stop, "*", deny]
+    - ["*", "*", deny]  # deny by default: every tool not allowed here stays out of the request
     - "@core-read"
     - [question, "*", deny]
     - "@web"
@@ -116,9 +117,7 @@ agents:
     - "@external-dirs"
     - "@env-guard"
   code-writer:
-    - ["*", "*", ask]
-    - [subagent_list, "*", deny]
-    - [subagent_stop, "*", deny]
+    - ["*", "*", deny]  # deny by default: every tool not allowed here stays out of the request
     - "@core-read"
     - [question, "*", deny]
     - "@web"
@@ -174,11 +173,8 @@ agents:
     - "@external-dirs"
     - "@env-guard"
     - [lsp-tools_*, "*", allow]
-    - [grep_app_*, "*", allow]
   frontend-engineer:
-    - ["*", "*", ask]
-    - [subagent_list, "*", deny]
-    - [subagent_stop, "*", deny]
+    - ["*", "*", deny]  # deny by default: every tool not allowed here stays out of the request
     - "@core-read"
     - [question, "*", deny]
     - "@web"
@@ -200,11 +196,11 @@ agents:
     - "@env-guard"
   orchestrator:
     - ["*", "*", ask]
+    - [docs_*, "*", deny]  # report tooling: document-writer and scholar only; keeps ~4.7 KB out of the catalog
     - "@core-read"
     - [question, "*", allow]
     - "@web"
     - [lsp-tools_*, "*", allow]
-    - [grep_app_*, "*", allow]
     - [workplan_read, "*", allow]
     - [workplan_resume, "*", allow]
     - [workplan_list, "*", allow]
@@ -212,6 +208,7 @@ agents:
     - [workplan_validate, "*", allow]
     - [workplan_doctor, "*", allow]
     - [workplan_compact_preview, "*", allow]
+    - [opencode_list_mcp_resources, "*", allow]
     - "@implement"
     - [subagent, "*", deny]
     - [workplan_create, "*", allow]
@@ -227,6 +224,7 @@ agents:
     - [subagent, code-writer, allow]
     - [subagent, code-engineer, allow]
     - [subagent, frontend-engineer, allow]
+    - [subagent, fidelity, allow]  # repo-local project agent (.opencode/agents/fidelity.md)
     - [subagent, code-checker, allow]
     - [subagent, tester, allow]
     - [subagent, oracle, allow]
@@ -235,6 +233,7 @@ agents:
     - [subagent, experimenter, allow]
     - [subagent_list, "*", allow]
     - [subagent_stop, "*", allow]  # the tool itself refuses sessions that are not the caller's children
+    - [compress, "*", allow]  # DCP context compression (primary sessions only)
     - "@external-dirs"
     - "@env-guard"
   plan-checker:
@@ -252,11 +251,12 @@ agents:
     - [question, "*", deny]
     - "@web"
     - [lsp-tools_*, "*", allow]
-    - [grep_app_*, "*", allow]
     - "@workplan-read"
     - [workplan_resume, "*", allow]
     - [workplan_doctor, "*", allow]
     - [workplan_compact_preview, "*", allow]
+    - [opencode_list_mcp_resources, "*", allow]
+    - [opencode_read_mcp_resource, "*", allow]  # workplan-permissions restricts plan to server workplan
     - [workplan_create, "*", allow]
     - [workplan_update, "*", allow]
     - [workplan_patch, "*", allow]
@@ -269,6 +269,7 @@ agents:
     - [subagent, researcher, allow]
     - [subagent, plan-checker, allow]
     - [subagent, oracle, allow]
+    - [compress, "*", allow]  # DCP context compression (primary sessions only)
     - "@external-dirs"
     - [external_directory, "*/.opencode/workplan", allow]
     - [external_directory, "*/.opencode/workplan/*", allow]
@@ -286,9 +287,7 @@ agents:
     - [gofetch_*, "*", allow]
     - [researcher-mcp_*, "*", allow]
     - [context7_*, "*", allow]
-    - [deepwiki_*, "*", allow]
     - [lsp-tools_*, "*", allow]
-    - [grep_app_*, "*", allow]
     - "@workplan-read"
     - "@external-dirs"
     - "@env-guard"
@@ -303,7 +302,6 @@ agents:
     - [gofetch_*, "*", allow]
     - [researcher-mcp_*, "*", allow]
     - [context7_*, "*", allow]
-    - [deepwiki_*, "*", allow]
     - [edit, "*", allow]
     - [shell, "*", ask]
     - [shell, rg *, allow]
@@ -327,6 +325,7 @@ agents:
     - [subagent, document-proofreader, allow]
     - [subagent, explore, allow]
     - [subagent, experimenter, allow]
+    - [compress, "*", allow]  # DCP context compression (primary sessions only)
     - "@workplan-write-deny"
     - "@external-dirs"
     - "@env-guard"

@@ -3,6 +3,9 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 export interface AuthTokens {
+  anthropic?: {
+    accessToken: string;
+  };
   copilot?: {
     accessToken: string;
   };
@@ -82,6 +85,14 @@ export function mergeRuntimeOpenAI(tokens: AuthTokens, credential: unknown): Aut
   return openai ? { ...tokens, openai } : tokens;
 }
 
+/** Anthropic subscription usage requires OAuth, not an API key. */
+export function normalizeAnthropicCredential(value: unknown): AuthTokens["anthropic"] | undefined {
+  const credential = asRecord(value);
+  if (!credential || credential.type !== "oauth") return undefined;
+  const accessToken = nonEmptyString(credential.access);
+  return accessToken ? { accessToken } : undefined;
+}
+
 /**
  * Normalize the provider entries used by OpenCode's auth.json without
  * retaining or printing any unrelated credential fields.
@@ -96,8 +107,10 @@ export function normalizeAuth(value: unknown): AuthTokens {
   const openaiRecords = providerRecords(root, ["openai", "chatgpt", "openai-codex", "codex"]);
   const openaiAccess = firstString(openaiRecords, ["access", "accessToken", "token", "key"]);
   const accountId = firstString(openaiRecords, ["accountId", "account_id", "chatgptAccountId"]);
+  const anthropic = normalizeAnthropicCredential(root.anthropic);
 
   return {
+    ...(anthropic ? { anthropic } : {}),
     ...(copilotAccess ? { copilot: { accessToken: copilotAccess } } : {}),
     ...(openaiAccess
       ? {

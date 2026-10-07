@@ -43,5 +43,12 @@
   "debug": {
     "devtools": false
   },
-  "plugins": ["./packages/status-line"]
+  "plugins": [
+    "./packages/status-line",
+    "-opencode.notifications"
+  ],
+  "attention": {
+    "sound": true,
+    "volume": 0.9999999999999999
+  }
 }

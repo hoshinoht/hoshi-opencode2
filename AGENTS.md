@@ -23,9 +23,16 @@ When instructions disagree, follow the user's current request first, then your a
 
 ## Finding things
 
-- Repository search: use the dedicated grep and glob tools. Where your shell permissions allow it, `rg` for content and `rg --files` for paths are equally good. Do not start with Unix `grep` or `find`. The shell tool takes a command string (plus optional working directory and timeout), never the grep or read tools' arguments.
+- Repository search: use the dedicated grep and glob tools. Where your shell permissions allow it, `rg` for content and `rg --files` for paths are equally good; always pass a path (`rg pattern .`), because with no path `rg` may read stdin instead of searching the directory. Do not start with Unix `grep` or `find`. The shell tool takes a command string (plus optional working directory and timeout), never the grep or read tools' arguments.
+- Code navigation: when you have the `lsp-tools` MCP, use `lsp_goto_definition`, `lsp_find_references` and `lsp_symbols` to follow a symbol rather than text search, and `lsp_rename` for renames. After editing TypeScript or Python, `lsp_diagnostics` on the changed files is a fast type check; still run the project's own typecheck and tests before reporting.
 - Web: when you have `gofetch_web_search` and `gofetch_fetch`, use them first. Search to discover pages, fetch known URLs and PDFs (use `focus` to extract only what you need), and fetch only the results worth reading. Fall back to the generic web tools only when gofetch is missing or fails, and say that you did. With no web tools, finish the local work and name the external facts the parent should send to `researcher`.
 - Check version-sensitive facts (APIs, library behaviour, configuration keys) against the installed version and current documentation rather than memory.
+
+## Shell
+
+- Shell calls are non-interactive: no editors, pagers, REPLs or prompts. Use `git --no-pager`, `git commit -m`, `git merge --no-edit`; never `git add -p` or `git rebase -i`. Prefix `GIT_TERMINAL_PROMPT=0 GIT_EDITOR=true PAGER=cat` when a command might prompt, and prefer flags (`--yes`, `-y`) over piping answers.
+- The workstation is macOS: BSD `sed`, `find` and `date`, and no `timeout` command (use the shell tool's timeout instead). Before package, service or distro-specific commands on a Linux host, load `shell-strategy`.
+- Run dev servers, watchers and other long jobs detached (the shell tool's background mode, or a named `tmux` session logging to a file), and stop them when done.
 
 ## Editing files
 

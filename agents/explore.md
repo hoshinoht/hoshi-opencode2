@@ -4,7 +4,7 @@ description: Fast file system navigator. Locates files, logs, configs, or code
 mode: subagent
 model: openai/gpt-6-luna#low
 # model: openai/gpt-6-luna#low
-color: "#22D3EE"
+color: "#8BD3FF"
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
 permissions:
   - action: "*"
@@ -59,9 +59,6 @@ permissions:
     resource: "*.env.example"
     effect: allow
   - action: lsp-tools_*
-    resource: "*"
-    effect: allow
-  - action: grep_app_*
     resource: "*"
     effect: allow
 ---

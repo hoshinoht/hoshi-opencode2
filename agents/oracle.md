@@ -3,7 +3,7 @@ description: Exceptional read-only architecture or debugging advisor. Use after
   contradictory evidence, high-impact uncertainty, or repeated failed
   approaches.
 mode: subagent
-color: "#818CF8"
+color: "#B0BCE8"
 # model: openai/gpt-6-astra#low
 model: anthropic/claude-fable-5-1#medium
 # fallback-model: opencode/muse-spark-1.3-contributor-free#xhigh
@@ -36,9 +36,6 @@ permissions:
     resource: "*"
     effect: allow
   - action: context7_*
-    resource: "*"
-    effect: allow
-  - action: deepwiki_*
     resource: "*"
     effect: allow
   - action: lsp-tools_*

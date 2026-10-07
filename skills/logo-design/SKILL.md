@@ -1,6 +1,6 @@
 ---
 name: logo-design
-description: Design, critique, redesign and export logos and brand marks as clean geometric SVG. Covers discovery and a short design brief, three distinct concepts across mark types (wordmark, monogram, letterform, pictorial, abstract, emblem, combination), hand-built SVG, rendering and visually checking the work, scale/one-colour/reversed/distinctiveness tests, a concept checkpoint before building the full kit, and delivery variants (black, white, mono, app icon, favicon, web icon set). Bundled dependency-free Python scripts audit SVGs, render PNGs, build a concept overview sheet and export variants. Use whenever the user wants a logo, logotype, wordmark, monogram, symbol, brand mark, app icon or favicon designed, refreshed, critiqued or compared, asks for logo ideas, or is naming and branding a new company, product or project, even if they don't say "logo".
+description: Design, critique, redesign and export logos, brand marks, app icons and favicons as clean geometric SVG, with bundled scripts to audit, render and export variants. Use when the user wants a logo or brand mark made, refreshed or compared, or is naming and branding a new project.
 license: MIT (adapted from logo-design-skill by Kaan Kızıltuğ; see LICENSE)
 metadata:
   source: "https://github.com/kaankiziltug/logo-design-skill"

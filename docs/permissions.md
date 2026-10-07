@@ -30,18 +30,28 @@ agents:
 - `"@name"` splices a fragment in at that exact position, so fragment order is preserved. Fragments can reference other fragments; unknown names and cycles are errors.
 - Every file in `agents/` must have an entry under `agents:`.
 
+### Default effect
+
+Subagents start from `["*", "*", deny]` and allow what they use. A tool that is not denied (even one left at `ask`) is still offered to the model: OpenCode lists it in the agent's Code Mode tool catalog, which is sent with every request and again whenever the catalog changes. With an `ask` default, the implementers carried all `docs_*`, `researcher-mcp_*` and status tools they never call, about 13 KB of catalog per notice, and an `ask` inside a subagent stops the run for a permission prompt. Only primary agents a person drives directly (`build`, `orchestrator`, `scholar`) and `document-writer` keep an `ask` default.
+
+`edit`, `write` and `patch` all check the `edit` permission, so `@implement` covers them. The desktop browser tools (`browser.*`) check `browser`, but OpenCode appends `browser * deny` to every agent and grants it per session when the desktop browser attaches, so agent rules cannot allow it.
+
 ### Fragments
 
 | Fragment | Contents |
 |---|---|
 | `core-read` | `read`, `glob`, `grep`, `skill` |
-| `web` | `webfetch`, `websearch`, `gofetch_*`, `context7_*`, `deepwiki_*` |
+| `web` | `webfetch`, `websearch`, `gofetch_*`, `context7_*` |
 | `workplan-read` | `workplan_read`, `workplan_list`, `workplan_inspect`, `workplan_validate`, `workplan_resume` |
 | `shell-guard` | ask before `git push*`, `git reset --hard*`, `git clean*`, `rm -rf*` |
 | `implement` | `edit` and `shell` allowed, followed by `@shell-guard` |
-| `workplan-write-deny` | deny `workplan_create`, `workplan_update`, `workplan_patch`, `workplan_reset` |
+| `workplan-write-deny` | deny `workplan_create`, `workplan_update`, `workplan_patch`, `workplan_reset`, `workplan_checkpoint`, `workplan_compact` |
 | `external-dirs` | ask for outside directories, but allow the skills folder and tool-output folder |
 | `env-guard` | ask before reading `.env` files; allow `.env.example` |
+
+Shiori is served over MCP. The `workplan-permissions` plugin preserves the lifecycle role checks using OpenCode's trusted tool caller: only `plan` and `orchestrator` may author plans, and only `orchestrator` may recover transactions, write checkpoints or apply compaction. This supplements the tool allow/ask/deny rules, so an argument such as `recovery` cannot bypass ownership through an otherwise allowed `workplan_update`.
+
+`plan` may list MCP resources and read resources from the `workplan` server; the plugin blocks its reads from other servers. `orchestrator` may list resources, while resource reads retain its existing `ask` policy.
 
 ## Generator
 

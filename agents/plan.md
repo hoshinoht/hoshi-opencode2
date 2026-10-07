@@ -2,7 +2,7 @@
 description: Software-engineering planner. Returns a concise executable approach
   by default and creates durable workplans only when coordination warrants it.
 mode: all
-color: "#FBBF24"
+color: "#F4DA86"
 # model: openai/gpt-6.1-sol-1m#high
 model: anthropic/claude-opus-5-5#high
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
@@ -37,13 +37,7 @@ permissions:
   - action: context7_*
     resource: "*"
     effect: allow
-  - action: deepwiki_*
-    resource: "*"
-    effect: allow
   - action: lsp-tools_*
-    resource: "*"
-    effect: allow
-  - action: grep_app_*
     resource: "*"
     effect: allow
   - action: workplan_read
@@ -68,6 +62,12 @@ permissions:
     resource: "*"
     effect: allow
   - action: workplan_compact_preview
+    resource: "*"
+    effect: allow
+  - action: opencode_list_mcp_resources
+    resource: "*"
+    effect: allow
+  - action: opencode_read_mcp_resource
     resource: "*"
     effect: allow
   - action: workplan_create
@@ -105,6 +105,9 @@ permissions:
     effect: allow
   - action: subagent
     resource: oracle
+    effect: allow
+  - action: compress
+    resource: "*"
     effect: allow
   - action: external_directory
     resource: "*"

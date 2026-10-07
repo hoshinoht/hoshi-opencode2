@@ -29,6 +29,7 @@ export {
 } from "./src/auth.ts";
 export { fetchCopilotUsage, parseCopilotUsage } from "./src/providers/copilot.ts";
 export { fetchOpenAIUsage, parseOpenAIUsage } from "./src/providers/openai.ts";
+export { fetchAnthropicUsage, parseAnthropicUsage } from "./src/providers/anthropic.ts";
 export { UsageTrackerRpc, USAGE_RPC_ID } from "./src/rpc.ts";
 
 export default usageTracker;

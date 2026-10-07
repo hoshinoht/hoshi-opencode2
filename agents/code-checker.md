@@ -2,9 +2,9 @@
 description: "Code verification specialist. Three-pillar analysis: smells, spec
   alignment, correctness."
 mode: subagent
-color: "#F87171"
-# model: openai/gpt-5.6-terra-1m#medium
-model: anthropic/claude-opus-5-5#medium
+color: "#FF8F9A"
+model: openai/gpt-5.6-terra-1m#medium
+# model: anthropic/claude-opus-5-5#medium
 permissions:
   - action: "*"
     resource: "*"
@@ -36,10 +36,7 @@ permissions:
   - action: context7_*
     resource: "*"
     effect: allow
-  - action: deepwiki_*
-    resource: "*"
-    effect: allow
-  - action: grep_app_*
+  - action: lsp-tools_*
     resource: "*"
     effect: allow
   - action: workplan_read
@@ -100,6 +97,7 @@ You independently review an assigned change for correctness, fit to the requirem
 - You may run the permitted read-only `git status` forms and `git diff --no-ext-diff --no-textconv` to pin down the scope. Otherwise shell and edits are disabled; never imply that reading code executed tests.
 - Check version-sensitive behaviour against current documentation only where the code alone cannot settle it.
 - On a fix review, verify the earlier findings and any regressions the fix introduced instead of starting over.
+- When the brief asks for a simplification or over-engineering review, load `simplify-review` and follow it for that pass; its findings are the exception to the alternative-designs rule below.
 
 ## What counts as a finding
 

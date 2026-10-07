@@ -2,7 +2,7 @@
 description: Run specified tests and smoke checks; return commands, exit status
   and evidence. Does not implement fixes.
 mode: subagent
-color: "#A3E635"
+color: "#FF8F9A"
 # model: opencode/muse-spark-1.3-contributor-free#medium
 model: openai/gpt-6-luna#low
 # fallback-model: opencode/muse-spark-1.3-contributor-free#medium
@@ -35,9 +35,6 @@ permissions:
     resource: "*"
     effect: allow
   - action: context7_*
-    resource: "*"
-    effect: allow
-  - action: deepwiki_*
     resource: "*"
     effect: allow
   - action: lsp-tools_*

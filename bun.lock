@@ -27,16 +27,16 @@
         "yaml": "^2.8.0",
       },
     },
-    "packages/openai-long-context": {
-      "name": "@hoshi-opencode2/openai-long-context",
-      "version": "1.1.0",
+    "packages/image-budget": {
+      "name": "@hoshi-opencode2/image-budget",
+      "version": "1.0.0",
       "dependencies": {
         "@opencode/plugin": "2.0.20",
       },
     },
-    "packages/quota-fallback": {
-      "name": "@hoshi-opencode2/quota-fallback",
-      "version": "1.0.0",
+    "packages/openai-long-context": {
+      "name": "@hoshi-opencode2/openai-long-context",
+      "version": "1.1.0",
       "dependencies": {
         "@opencode/plugin": "2.0.20",
       },
@@ -68,13 +68,11 @@
         "solid-js": ">=1.9.0",
       },
     },
-    "packages/workplan-tools": {
-      "name": "@hoshi-opencode2/workplan-tools",
+    "packages/workplan-permissions": {
+      "name": "@hoshi-opencode2/workplan-permissions",
       "version": "1.0.0",
       "dependencies": {
-        "@opencode/client": "2.0.20",
         "@opencode/plugin": "2.0.20",
-        "zod": "4.1.8",
       },
     },
   },
@@ -199,9 +197,9 @@
 
     "@hoshi-opencode2/docs": ["@hoshi-opencode2/docs@workspace:packages/docs"],
 
-    "@hoshi-opencode2/openai-long-context": ["@hoshi-opencode2/openai-long-context@workspace:packages/openai-long-context"],
+    "@hoshi-opencode2/image-budget": ["@hoshi-opencode2/image-budget@workspace:packages/image-budget"],
 
-    "@hoshi-opencode2/quota-fallback": ["@hoshi-opencode2/quota-fallback@workspace:packages/quota-fallback"],
+    "@hoshi-opencode2/openai-long-context": ["@hoshi-opencode2/openai-long-context@workspace:packages/openai-long-context"],
 
     "@hoshi-opencode2/reasoning-router": ["@hoshi-opencode2/reasoning-router@workspace:packages/reasoning-router"],
 
@@ -209,7 +207,7 @@
 
     "@hoshi-opencode2/usage-tracker": ["@hoshi-opencode2/usage-tracker@workspace:packages/usage-tracker"],
 
-    "@hoshi-opencode2/workplan-tools": ["@hoshi-opencode2/workplan-tools@workspace:packages/workplan-tools"],
+    "@hoshi-opencode2/workplan-permissions": ["@hoshi-opencode2/workplan-permissions@workspace:packages/workplan-permissions"],
 
     "@isaacs/cliui": ["@isaacs/cliui@8.0.2", "", { "dependencies": { "string-width": "^5.1.2", "string-width-cjs": "npm:string-width@^4.2.0", "strip-ansi": "^7.0.1", "strip-ansi-cjs": "npm:strip-ansi@^6.0.1", "wrap-ansi": "^8.1.0", "wrap-ansi-cjs": "npm:wrap-ansi@^7.0.0" } }, "sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA=="],
 

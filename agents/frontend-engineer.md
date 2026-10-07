@@ -2,18 +2,12 @@
 description: Frontend specialist for production-grade UI architecture,
   accessibility, responsiveness, interaction, and visual implementation.
 mode: subagent
-color: "#F472B6"
+color: "#FFB8D1"
 # model: openai/gpt-5.6-terra-1m#medium
 model: anthropic/claude-opus-5-5#medium
 # fallback-model: opencode/muse-spark-1.3-contributor-free#high
 permissions:
   - action: "*"
-    resource: "*"
-    effect: ask
-  - action: subagent_list
-    resource: "*"
-    effect: deny
-  - action: subagent_stop
     resource: "*"
     effect: deny
   - action: read
@@ -41,9 +35,6 @@ permissions:
     resource: "*"
     effect: allow
   - action: context7_*
-    resource: "*"
-    effect: allow
-  - action: deepwiki_*
     resource: "*"
     effect: allow
   - action: lsp-tools_*
@@ -95,6 +86,12 @@ permissions:
     resource: "*"
     effect: deny
   - action: workplan_reset
+    resource: "*"
+    effect: deny
+  - action: workplan_checkpoint
+    resource: "*"
+    effect: deny
+  - action: workplan_compact
     resource: "*"
     effect: deny
   - action: external_directory
